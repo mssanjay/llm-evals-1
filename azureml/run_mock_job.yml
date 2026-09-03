@@ -1,0 +1,13 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+display_name: "cue-eval-mock"
+experiment_name: "cue-following-demo"
+description: "Run the simple cue-following demo in Azure ML without a real model."
+code: ..
+command: >-
+  python scripts/run_experiment.py
+  --provider dry-run
+  --output-dir outputs/azure_mock
+environment:
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04
+  conda_file: conda.yml
+compute: azureml:YOUR_COMPUTE_NAME
