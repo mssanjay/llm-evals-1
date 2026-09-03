@@ -25,10 +25,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="qwen3-32b")
     parser.add_argument("--prepared-dir", default="data")
     parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
-    parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=256)
     parser.add_argument("--reasoning-modes", default="off,on")
+    parser.add_argument("--cue-counts", default="1,2,3,4,5,6,7,8,9,10")
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=0,
+        help="Parallel episodes to run at once. Auto: 1 for Ollama, 4 for hosted providers.",
+    )
     parser.add_argument("--story-pool", default="data/story_pool.jsonl")
     return parser.parse_args()
 
@@ -39,19 +45,22 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     reasoning_modes = [mode.strip() for mode in args.reasoning_modes.split(",") if mode.strip()]
+    cue_counts = [int(value.strip()) for value in args.cue_counts.split(",") if value.strip()]
+    max_workers = args.max_workers or (1 if args.provider == "ollama" else 4)
 
     dataset = "math500"
-    data_path = _prepared_path(dataset, args.limit, Path(args.prepared_dir))
+    data_path = _prepared_path(dataset, Path(args.prepared_dir))
     all_rows = run_experiment2_experiment(
         data_path=data_path,
         dataset_name=dataset,
         output_dir=output_dir,
         provider=args.provider,
         model=args.model,
-        limit=args.limit,
         temperature=args.temperature,
         max_tokens=args.max_tokens,
         reasoning_modes=reasoning_modes,
+        cue_counts=cue_counts,
+        max_workers=max_workers,
         story_pool_path=args.story_pool or None,
     )
     print(f"Ran {len(all_rows)} live-history episodes for {dataset}.")
@@ -62,11 +71,9 @@ def main() -> None:
     print(f"Wrote {len(summary)} summary rows to {output_dir.resolve()}")
 
 
-def _prepared_path(dataset: str, limit: int, prepared_dir: Path) -> Path:
-    """Use exact prepared files when present, otherwise reuse the 100-line file."""
-    exact_path = prepared_dir / f"{dataset}_prepared_{limit}.jsonl"
-    stable_path = prepared_dir / f"{dataset}_prepared_100.jsonl"
-    return exact_path if exact_path.exists() else stable_path
+def _prepared_path(dataset: str, prepared_dir: Path) -> Path:
+    """Use every row from the stable prepared MATH-500 file."""
+    return prepared_dir / f"{dataset}_prepared_50.jsonl"
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -83,7 +90,7 @@ def _write_full_results(path: Path, rows: list[dict[str, Any]], model: str, prov
     """Write a coach-friendly condition summary with presentation columns first."""
     full_rows: list[dict[str, Any]] = []
     for row in rows:
-        held_count = int(row["rule_held_count"])
+        cue_count = int(row["cue_count"])
         full_rows.append(
             {
                 "Model": model,
@@ -92,11 +99,12 @@ def _write_full_results(path: Path, rows: list[dict[str, Any]], model: str, prov
                 "Cue type": "wrong_answer_shortcut_cue",
                 "History": "live-history teaching turns",
                 "Reasoning": row["reasoning"],
-                "Story": f"rule_held_count={held_count}",
+                "Story": f"cue_count={cue_count}",
                 "n": row["n"],
-                "rule_held_count": held_count,
+                "cue_count": cue_count,
                 "shortcut_count": row["shortcut_count"],
                 "shortcut_rate": row["shortcut_rate"],
+                "avg_rule_held_count": row["avg_rule_held_count"],
             }
         )
     _write_csv(path, full_rows)

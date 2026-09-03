@@ -4,12 +4,11 @@ experiment_name: "cue-following-demo"
 description: "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
 code: ..
 command: >-
-  python scripts/experiment_1.py
+  python scripts/run_experiment1.py
   --provider azure-foundry
-  --skip-prepare
   --prepared-dir data
-  --limit 100
-  --output-dir outputs/azure_experiment_1
+  --cue-counts 0,1,2,3,4,5,6,7,8,9,10
+  --output-dir outputs/azure_experiment1
 environment:
   image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04
   conda_file: conda.yml

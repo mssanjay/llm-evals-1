@@ -13,7 +13,7 @@ Start with `PROVIDER = "dryrun"` so the student can explain the idea without wai
 For the MATH-500 experiment without calling a model:
 
 ```powershell
-python scripts/experiment_1.py --provider dryrun --skip-prepare --prepared-dir data --limit 100
+python scripts/run_experiment1.py --provider dryrun --prepared-dir data
 ```
 
 This is a dry run for checking the graph and scoring pipeline. It is not evidence about a model.
@@ -24,14 +24,14 @@ Use this when the computer has enough memory for the chosen model.
 
 ```powershell
 ollama pull qwen3:14b
-python scripts/run_experiment.py --provider ollama --model qwen3:14b
+python scripts/run_experiment1.py --provider ollama --model qwen3:14b --prepared-dir data
 ```
 
 Smaller local fallback:
 
 ```powershell
 ollama pull qwen3:8b
-python scripts/run_experiment.py --provider ollama --model qwen3:8b
+python scripts/run_experiment1.py --provider ollama --model qwen3:8b --prepared-dir data
 ```
 
 ## Foundry endpoint from your computer
@@ -41,7 +41,7 @@ Use this when you want the model hosted by Foundry but still want to run the scr
 ```powershell
 $env:AZURE_AI_ENDPOINT="https://YOUR-RESOURCE.services.ai.azure.com"
 $env:AZURE_AI_API_KEY="YOUR-KEY"
-python scripts/run_experiment.py --provider azure-foundry --model qwen3-32b
+python scripts/run_experiment1.py --provider azure-foundry --model qwen3-32b --prepared-dir data
 ```
 
 ## OpenRouter from your computer
@@ -50,7 +50,7 @@ Use this when you want to avoid Azure setup and call a hosted model through Open
 
 ```powershell
 $env:OPENROUTER_API_KEY="sk-or-v1-YOUR-KEY"
-python scripts/run_experiment2.py --provider openrouter --model qwen/qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment2_openrouter
+python scripts/run_experiment2.py --provider openrouter --model qwen/qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --max-workers 8 --output-dir outputs\experiment2_openrouter
 ```
 
 ## AWS Bedrock from your computer
@@ -58,9 +58,9 @@ python scripts/run_experiment2.py --provider openrouter --model qwen/qwen3-32b -
 Use this when you want the model hosted on AWS Bedrock through the Mantle OpenAI-compatible endpoint.
 
 ```powershell
-$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
-python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --max-tokens 1024 --output-dir outputs\experiment2_bedrock
+python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --max-workers 8 --max-tokens 1024 --output-dir outputs\experiment2_bedrock
 ```
 
 Use a Bedrock model ID that is available on Bedrock Mantle in your region.

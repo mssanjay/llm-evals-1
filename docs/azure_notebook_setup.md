@@ -55,12 +55,11 @@ Experiment 1 tests whether repeating a bad clue more often makes the model follo
 from cue_eval.experiment import run_experiment
 
 rows, summary = run_experiment(
-    data_path=ROOT / "data" / "math500_prepared_100.jsonl",
-    output_dir=ROOT / "outputs" / "notebook_experiment_1_azure",
+    data_path=ROOT / "data" / "math500_prepared_50.jsonl",
+    output_dir=ROOT / "outputs" / "notebook_experiment1_azure",
     provider="azure-foundry",
     model="qwen3-32b",
     cue_counts=[0, 2, 10],
-    limit=20,
     temperature=0.2,
     max_tokens=256,
 )
@@ -76,15 +75,16 @@ Experiment 2 uses the live-history teaching-turn methodology.
 from cue_eval.experiment2 import run_experiment2_experiment, write_experiment2_outputs
 
 all_rows = run_experiment2_experiment(
-    data_path=ROOT / "data" / "math500_prepared_100.jsonl",
+    data_path=ROOT / "data" / "math500_prepared_50.jsonl",
     dataset_name="math500",
     output_dir=ROOT / "outputs" / "notebook_experiment2_azure" / "math500",
     provider="azure-foundry",
     model="qwen3-32b",
-    limit=20,
     temperature=0.2,
     max_tokens=256,
     reasoning_modes=["off", "on"],
+    cue_counts=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    max_workers=8,
     story_pool_path=ROOT / "data" / "story_pool.jsonl",
 )
 
@@ -94,7 +94,7 @@ summary
 
 ## Start small
 
-Use `limit=5` or `limit=20` first. After the prompts, scoring, and plot look right, increase to `limit=100`.
+Experiment 2 now uses every row in the prepared MATH500 file. Use `dryrun` first when you want a quick check without waiting for model calls.
 
 ## Key idea
 

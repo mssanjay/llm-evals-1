@@ -1,14 +1,15 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 display_name: "experiment-2-live-history-comparison"
 experiment_name: "cue-following-demo"
-description: "Experiment 2: compare probe shortcut rate by how many teaching turns held the planted rule."
+description: "Experiment 2: compare probe shortcut count by wrong-answer cue count in live-history stories."
 code: ..
 command: >-
   python scripts/run_experiment2.py
   --provider azure-foundry
   --prepared-dir data
   --story-pool data/story_pool.jsonl
-  --limit 100
+  --cue-counts 1,2,3,4,5,6,7,8,9,10
+  --max-workers 4
   --output-dir outputs/azure_experiment2
 environment:
   image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04

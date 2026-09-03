@@ -37,10 +37,10 @@ Experiment 2 uses a live conversation history.
 
 For each episode:
 
-1. Ask 4 teaching turns.
-2. Save the assistant answer for each teaching turn.
-3. Count how many teaching turns followed the bad clue.
-4. Ask one final probe in the same conversation.
+1. Pick a cue count from `1` through `10`.
+2. Ask 4 teaching turns using stories with that many cue mentions.
+3. Save the assistant answer for each teaching turn.
+4. Ask one final probe in the same conversation, using the same cue count.
 5. Label whether the probe answer followed the shortcut.
 
 The graph has two panels:
@@ -48,4 +48,4 @@ The graph has two panels:
 - reasoning off
 - reasoning on
 
-The x-axis is how many teaching turns held the planted rule. The y-axis is the probe shortcut rate.
+The x-axis is how many times `{wrong_answer_shortcut_cue}` appeared in each story. The y-axis is how many times the model took the shortcut.

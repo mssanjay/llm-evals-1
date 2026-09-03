@@ -15,7 +15,8 @@ param(
     [int]$Experiment = 2,
 
     [string]$Model = "qwen3-32b",
-    [int]$Limit = 100,
+    [string]$CueCounts = "",
+    [int]$MaxWorkers = 4,
     [int]$MaxTokens = 256,
     [double]$Temperature = 0.2,
     [string]$AzureAiEndpoint = $env:AZURE_AI_ENDPOINT,
@@ -29,7 +30,7 @@ param(
     [string]$OpenRouterSiteUrl = $env:OPENROUTER_SITE_URL,
     [string]$OpenRouterAppName = $env:OPENROUTER_APP_NAME,
     [string]$AwsRegion = $env:AWS_BEDROCK_REGION,
-    [string]$AwsBearerTokenBedrock = $env:AWS_BEARER_TOKEN_BEDROCK,
+    [string]$AwsBearerTokenBedrock = $env:BEDROCK_API_KEY,
     [string]$AwsBedrockMantleBaseUrl = $env:AWS_BEDROCK_MANTLE_BASE_URL,
     [switch]$PrepareDatasets,
     [switch]$NoSubmit
@@ -66,27 +67,34 @@ if (-not $AwsRegion) {
     $AwsRegion = $env:AWS_DEFAULT_REGION
 }
 
-$runner = if ($Experiment -eq 1) { "scripts/experiment_1.py" } else { "scripts/run_experiment2.py" }
+$runner = if ($Experiment -eq 1) { "scripts/run_experiment1.py" } else { "scripts/run_experiment2.py" }
 $displayName = if ($Experiment -eq 1) { "experiment-1-multiturn-story-comparison" } else { "experiment-2-live-history-comparison" }
 $description = if ($Experiment -eq 1) {
     "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
 } else {
-    "Experiment 2: compare probe shortcut rate by how many teaching turns held the planted rule."
+    "Experiment 2: compare probe shortcut count by wrong-answer cue count in live-history stories."
 }
-$outputName = if ($Experiment -eq 1) { "azure_experiment_1" } else { "azure_experiment2" }
+$outputName = if ($Experiment -eq 1) { "azure_experiment1" } else { "azure_experiment2" }
 
-# Keep jobs focused on the already prepared 100-line files by default.
-$prepareFlag = ""
+# Keep jobs focused on the already prepared 50-line file.
 if ($Experiment -eq 1) {
-    $prepareFlag = if ($PrepareDatasets) { "" } else { "--skip-prepare --prepared-dir data" }
+    $defaultCueCounts = "0,1,2,3,4,5,6,7,8,9,10"
+    $prepareFlag = "--prepared-dir data"
 } else {
+    $defaultCueCounts = "1,2,3,4,5,6,7,8,9,10"
     $prepareFlag = "--prepared-dir data --story-pool data/story_pool.jsonl"
-    if ($PrepareDatasets) {
-        Write-Host "PrepareDatasets is ignored for Experiment 2. Regenerate data locally before submitting."
-    }
 }
 
-$command = "python $runner --provider $Provider $prepareFlag --limit $Limit --max-tokens $MaxTokens --temperature $Temperature --output-dir outputs/$outputName"
+if ($PrepareDatasets) {
+    Write-Host "PrepareDatasets is ignored. Regenerate data locally before submitting."
+}
+
+if (-not $CueCounts) {
+    $CueCounts = $defaultCueCounts
+}
+
+$workerFlag = if ($Experiment -eq 2) { "--max-workers $MaxWorkers" } else { "" }
+$command = "python $runner --provider $Provider $prepareFlag --cue-counts $CueCounts $workerFlag --max-tokens $MaxTokens --temperature $Temperature --output-dir outputs/$outputName"
 if ($Provider -notin @("dryrun", "mock")) {
     $command = "$command --model $Model"
 }
@@ -147,12 +155,12 @@ if ($Provider -eq "aws") {
         throw "Set AWS_BEDROCK_REGION, AWS_REGION, or AWS_DEFAULT_REGION, or pass -AwsRegion."
     }
     if (-not $AwsBearerTokenBedrock) {
-        throw "Set AWS_BEARER_TOKEN_BEDROCK before submitting an Azure ML job that calls Bedrock Mantle."
+        throw "Set BEDROCK_API_KEY before submitting an Azure ML job that calls Bedrock Mantle."
     }
     $lines += @(
         'environment_variables:',
         "  AWS_BEDROCK_REGION: `"$AwsRegion`"",
-        "  AWS_BEARER_TOKEN_BEDROCK: `"$AwsBearerTokenBedrock`""
+        "  BEDROCK_API_KEY: `"$AwsBearerTokenBedrock`""
     )
     if ($AwsBedrockMantleBaseUrl) {
         $lines += "  AWS_BEDROCK_MANTLE_BASE_URL: `"$AwsBedrockMantleBaseUrl`""

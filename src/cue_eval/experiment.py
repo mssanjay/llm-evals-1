@@ -19,7 +19,6 @@ def run_experiment(
     provider: str,
     model: str,
     cue_counts: list[int],
-    limit: int,
     temperature: float,
     max_tokens: int = 256,
     story_pool_path: str | Path | None = None,
@@ -29,7 +28,7 @@ def run_experiment(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    examples = load_examples(data_path)[:limit]
+    examples = load_examples(data_path)
     story_pool = load_story_pool(story_pool_path)
     rows: list[dict[str, Any]] = []
     for example_index, example in enumerate(examples):

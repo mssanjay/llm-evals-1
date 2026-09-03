@@ -95,13 +95,13 @@ def _call_openrouter(messages: list[dict[str, str]], model: str, temperature: fl
 def _call_bedrock(messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int) -> str:
     """Call the Bedrock Mantle OpenAI-compatible chat-completions endpoint."""
     api_key = (
-        os.getenv("AWS_BEARER_TOKEN_BEDROCK")
+        os.getenv("BEDROCK_API_KEY")
         or os.getenv("AWS_BEDROCK_API_KEY")
         or os.getenv("BEDROCK_API_KEY")
     )
     if not api_key:
         raise RuntimeError(
-            "Set AWS_BEARER_TOKEN_BEDROCK before using --provider aws with Bedrock Mantle."
+            "Set BEDROCK_API_KEY before using --provider aws with Bedrock Mantle."
         )
 
     region = os.getenv("AWS_BEDROCK_REGION") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")

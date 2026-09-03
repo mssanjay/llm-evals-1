@@ -1,10 +1,25 @@
 # LLM cue-following evaluation
 
+## objective
+
 This is a simple experiment for testing whether a language model follows a misleading clue from earlier in a conversation.
 
 The experiment is:
-
 > Does the model solve the math problem, or does it copy the bad clue?
+> We take real math problems from MATH500, hide a tempting wrong answer inside little stories, show the model a few practice turns, then test whether it actually solves the final problem or just copies the repeated clue.
+
+MATH500 dataset
+  -> load every example from the prepared MATH500 file
+  -> group examples into episodes
+  -> pick story templates from story pool
+  -> insert wrong-answer cues into stories
+  -> ask model teaching turns
+  -> ask final probe
+  -> score whether model took shortcut
+  -> make CSV + plot
+
+46 episodes x 10 cue counts x 2 reasoning modes = 920 result rows
+920 x 5 model calls = 4,600 model calls
 
 ## Quick Local Test
 
@@ -20,7 +35,7 @@ python -m pip install -r requirements.txt
 Run the no-model demo first:
 
 ```powershell
-python scripts/run_experiment.py --provider dryrun
+python scripts/run_experiment1.py --provider dryrun --prepared-dir data
 ```
 
 This writes `outputs/results.csv`, `outputs/summary.csv`, and `outputs/shortcut_rate.png` if `matplotlib` is installed.
@@ -31,9 +46,9 @@ For the dataset experiments, `dryrun` is the no-model mode. It uses known answer
 
 ## Prepared Dataset
 
-The prepared 100-line dataset and story pool are stored here:
+The prepared 50-line dataset and story pool are stored here:
 
-- `data/math500_prepared_100.jsonl`
+- `data/math500_prepared_50.jsonl`
 - `data/story_pool.jsonl`
 
 The story pool has 5 complex story templates for each cue count from 1 through 10. Each story uses `{wrong_answer_shortcut_cue}` exactly the requested number of times.
@@ -41,7 +56,7 @@ The story pool has 5 complex story templates for each cue count from 1 through 1
 Regenerate them from Hugging Face:
 
 ```powershell
-python scripts/prepare_hf_dataset.py --dataset math500 --output data\math500_prepared_100.jsonl --limit 100 --fetch-size 500
+python scripts/prepare_hf_dataset.py --dataset math500 --output data\math500_prepared_50.jsonl --limit 50 --fetch-size 300
 ```
 
 ## Experiment 1: Multi-Turn Story Cues
@@ -58,31 +73,27 @@ The default run now uses all cue counts from `0` through `10`.
 Run it without calling a model:
 
 ```powershell
-python scripts/experiment_1.py `
+python scripts/run_experiment1.py `
   --provider dryrun `
-  --skip-prepare `
   --prepared-dir data `
-  --limit 100 `
   --cue-counts 0,1,2,3,4,5,6,7,8,9,10 `
-  --output-dir outputs\experiment_1_demo
+  --output-dir outputs\experiment1_demo
 ```
 
 This writes:
 
-- `outputs\experiment_1_demo\full_results.csv`
-- `outputs\experiment_1_demo\math500_summary.csv`
-- `outputs\experiment_1_demo\math500_shortcut_rate.png`
+- `outputs\experiment1_demo\full_results.csv`
+- `outputs\experiment1_demo\math500_summary.csv`
+- `outputs\experiment1_demo\math500_shortcut_rate.png`
 
 Run Experiment 1 against Microsoft Foundry:
 
 ```powershell
-python scripts/experiment_1.py `
+python scripts/run_experiment1.py `
   --provider azure-foundry `
   --model qwen3-32b `
-  --skip-prepare `
   --prepared-dir data `
-  --limit 100 `
-  --output-dir outputs\experiment_1_azure_ai
+  --output-dir outputs\experiment1_azure_ai
 ```
 
 ### Math500 Reasoning Plot
@@ -92,9 +103,8 @@ Use this when you want two panels for reasoning on/off.
 ```powershell
 python scripts/run_math500_reasoning_cue_plot.py `
   --provider dryrun `
-  --data data\math500_prepared_100.jsonl `
+  --data data\math500_prepared_50.jsonl `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
   --output-dir outputs\math500_reasoning_cue_plot
 ```
 
@@ -109,25 +119,25 @@ Run the same plot against Microsoft Foundry:
 python scripts/run_math500_reasoning_cue_plot.py `
   --provider azure-foundry `
   --model qwen3-32b `
-  --data data\math500_prepared_100.jsonl `
+  --data data\math500_prepared_50.jsonl `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
   --output-dir outputs\math500_reasoning_cue_plot_azure_ai
 ```
 
 ## Experiment 2: Live-History Teaching Turns
 
-Experiment 2 is the methodology used by the attached plot.
+Experiment 2 is the live-history version of the story-cue experiment.
 
 For each episode:
 
-1. Run 4 teaching turns in the same conversation history.
-2. Score each teaching answer as `correct`, `followed_bad_clue`, or `other_wrong_answer`.
-3. Count how many teaching turns followed the bad clue.
-4. Ask one probe problem in that same conversation.
-5. Plot probe shortcut rate against `rule_held_count`.
+1. Choose a cue count from `1` through `10`.
+2. Run 4 teaching turns in the same conversation history, using stories with that many cue mentions.
+3. Score each teaching answer as `correct`, `followed_bad_clue`, or `other_wrong_answer`.
+4. Ask one probe problem in that same conversation, also using a story with that many cue mentions.
+5. Count whether the probe answer copied the wrong-answer cue.
+6. Plot shortcut count against cue count.
 
-Each teaching turn now uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The output CSV saves `teaching_prompt_1` through `teaching_prompt_4` and `probe_prompt` so the full conversation can be inspected.
+Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10. The output CSV saves `teaching_prompt_1` through `teaching_prompt_4` and `probe_prompt` so the full conversation can be inspected.
 
 Run it without calling a model:
 
@@ -137,7 +147,7 @@ python scripts/run_experiment2.py `
   --model qwen.qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
+  --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --output-dir outputs\experiment2_dryrun
 ```
 
@@ -148,6 +158,7 @@ This writes:
 - `outputs\experiment2_dryrun\experiment2_results.partial.csv`
 - `outputs\experiment2_dryrun\model_prompts.jsonl`
 - `outputs\experiment2_dryrun\experiment2_summary.csv`
+- `outputs\experiment2_dryrun\experiment2_shortcut_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
 - `outputs\experiment2_dryrun\progress.log`
 
@@ -165,6 +176,7 @@ This writes:
 The row-level CSV includes these labels:
 
 - `reasoning`: `off` or `on`
+- `cue_count`: how many times `{wrong_answer_shortcut_cue}` appears in each story
 - `teaching_label_1` through `teaching_label_4`
 - `rule_held_count`
 - `probe_label`
@@ -197,7 +209,7 @@ python scripts/run_experiment2.py `
   --model qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
+  --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --output-dir outputs\experiment2_azure_ai
 ```
 
@@ -212,26 +224,26 @@ ollama pull qwen3:14b
 Then run:
 
 ```powershell
-python scripts/run_experiment.py --provider ollama --model qwen3:14b
+python scripts/run_experiment1.py --provider ollama --model qwen3:14b --prepared-dir data
 ```
 
 For Experiment 1:
 
 ```powershell
-python scripts/experiment_1.py --provider ollama --model qwen3:14b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_ollama
+python scripts/run_experiment1.py --provider ollama --model qwen3:14b --prepared-dir data --output-dir outputs\experiment1_ollama
 ```
 
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment2.py --provider ollama --model qwen3:14b --prepared-dir data --limit 100 --output-dir outputs\experiment2_ollama
+python scripts/run_experiment2.py --provider ollama --model qwen3:14b --prepared-dir data --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment2_ollama
 ```
 
 If Ollama is running somewhere else:
 
 ```powershell
 $env:OLLAMA_URL="http://localhost:11434"
-python scripts/run_experiment.py --provider ollama --model qwen3:14b
+python scripts/run_experiment1.py --provider ollama --model qwen3:14b --prepared-dir data
 ```
 
 ## Run with OpenRouter
@@ -251,11 +263,11 @@ python scripts/run_experiment2.py `
   --model qwen/qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
+  --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --output-dir outputs\experiment2_openrouter
 ```
 
-For a smaller first check, use `--limit 5`. You can also pass `--model qwen3-32b`; the code maps it to OpenRouter's `qwen/qwen3-32b` slug.
+Experiment 2 uses every row in `data\math500_prepared_50.jsonl`. For each episode it tries stories with 1 cue, 2 cues, and so on up to 10 cues. You can also pass `--model qwen3-32b`; the code maps it to OpenRouter's `qwen/qwen3-32b` slug.
 
 ## Run with AWS Bedrock
 
@@ -266,7 +278,7 @@ https://bedrock-mantle.YOUR-REGION.api.aws/v1/chat/completions
 ```
 
 ```powershell
-$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
 ```
 
@@ -278,7 +290,7 @@ python scripts/run_experiment2.py `
   --model us.anthropic.claude-3-5-haiku-20241022-v1:0 `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
-  --limit 100 `
+  --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --max-tokens 1024 `
   --output-dir outputs\experiment2_bedrock
 ```
@@ -302,7 +314,7 @@ $env:AZURE_OPENAI_API_VERSION="2024-10-21"
 Then run:
 
 ```powershell
-python scripts/run_experiment.py --provider azure-openai --model YOUR-DEPLOYMENT-NAME
+python scripts/run_experiment1.py --provider azure-openai --model YOUR-DEPLOYMENT-NAME --prepared-dir data
 ```
 
 ## Run with Microsoft Foundry
@@ -331,19 +343,19 @@ $env:AZURE_AI_API_KEY="YOUR-KEY"
 Then run:
 
 ```powershell
-python scripts/run_experiment.py --provider azure-foundry --model qwen3-32b
+python scripts/run_experiment1.py --provider azure-foundry --model qwen3-32b --prepared-dir data
 ```
 
 For Experiment 1:
 
 ```powershell
-python scripts/experiment_1.py --provider azure-foundry --model qwen3-32b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_foundry
+python scripts/run_experiment1.py --provider azure-foundry --model qwen3-32b --prepared-dir data --output-dir outputs\experiment1_foundry
 ```
 
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment2_foundry
+python scripts/run_experiment2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment2_foundry
 ```
 
 The `--model` value must exactly match the deployment name shown in Foundry.
@@ -414,7 +426,7 @@ Run Experiment 2 as an Azure ML job against AWS Bedrock:
 
 ```powershell
 $env:AWS_BEDROCK_REGION="us-east-1"
-$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
 
 .\scripts\deploy_azureml.ps1 `
   -ResourceGroup "YOUR-RESOURCE-GROUP" `
@@ -485,5 +497,5 @@ Use the notebook or script in this order:
 For the coach-facing demo, keep the chart explanation simple:
 
 - Experiment 1 x-axis: wrong-answer cue count inside the story
-- Experiment 2 x-axis: how many teaching turns followed the planted rule
-- Y-axis: percent of probe answers that followed the bad clue
+- Experiment 2 x-axis: how many times the wrong-answer cue appears in each story
+- Experiment 2 y-axis: how many probe answers followed the bad clue
