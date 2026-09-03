@@ -1,4 +1,4 @@
-2026-09-03 07:58:59 | Starting live-history run provider=dry-run model=qwen3-32b examples=100 episodes_per_reasoning=96 reasoning_modes=off,on
+2026-09-03 07:58:59 | Starting live-history run provider=dryrun model=qwen3-32b examples=100 episodes_per_reasoning=96 reasoning_modes=off,on
 2026-09-03 07:58:59 | Starting reasoning=off
 2026-09-03 07:58:59 | Episode 1/96 reasoning=off started
 2026-09-03 07:58:59 | Episode 1/96 reasoning=off teaching_turn=1/4 label=correct parsed=9.0

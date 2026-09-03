@@ -1,15 +1,15 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
-display_name: "experiment-2-live-history-comparison"
+display_name: "experiment-1-multiturn-story-comparison"
 experiment_name: "cue-following-demo"
-description: "Experiment 2: compare probe shortcut rate by how many teaching turns held the planted rule."
+description: "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
 code: ..
 command: >-
-  python scripts/run_experiment_2.py
-  --provider dry-run
+  python scripts/experiment_1.py
+  --provider azure-foundry
+  --skip-prepare
   --prepared-dir data
-  --story-pool data/story_pool.jsonl
   --limit 100
-  --output-dir outputs/azure_experiment_2
+  --output-dir outputs/azure_experiment_1
 environment:
   image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04
   conda_file: conda.yml

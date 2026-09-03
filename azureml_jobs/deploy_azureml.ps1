@@ -8,8 +8,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ComputeName,
 
-    [ValidateSet("dry-run", "mock", "openrouter", "aws", "azure-foundry", "azure-ai", "azure-openai")]
-    [string]$Provider = "dry-run",
+    [ValidateSet("dryrun", "mock", "openrouter", "aws", "azure-foundry", "azure-ai", "azure-openai")]
+    [string]$Provider = "dryrun",
 
     [ValidateSet(1, 2)]
     [int]$Experiment = 2,
@@ -66,14 +66,14 @@ if (-not $AwsRegion) {
     $AwsRegion = $env:AWS_DEFAULT_REGION
 }
 
-$runner = if ($Experiment -eq 1) { "scripts/experiment_1.py" } else { "scripts/run_experiment_2.py" }
+$runner = if ($Experiment -eq 1) { "scripts/experiment_1.py" } else { "scripts/run_experiment2.py" }
 $displayName = if ($Experiment -eq 1) { "experiment-1-multiturn-story-comparison" } else { "experiment-2-live-history-comparison" }
 $description = if ($Experiment -eq 1) {
     "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
 } else {
     "Experiment 2: compare probe shortcut rate by how many teaching turns held the planted rule."
 }
-$outputName = if ($Experiment -eq 1) { "azure_experiment_1" } else { "azure_experiment_2" }
+$outputName = if ($Experiment -eq 1) { "azure_experiment_1" } else { "azure_experiment2" }
 
 # Keep jobs focused on the already prepared 100-line files by default.
 $prepareFlag = ""
@@ -87,7 +87,7 @@ if ($Experiment -eq 1) {
 }
 
 $command = "python $runner --provider $Provider $prepareFlag --limit $Limit --max-tokens $MaxTokens --temperature $Temperature --output-dir outputs/$outputName"
-if ($Provider -notin @("dry-run", "mock")) {
+if ($Provider -notin @("dryrun", "mock")) {
     $command = "$command --model $Model"
 }
 

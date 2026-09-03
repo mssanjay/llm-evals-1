@@ -17,7 +17,7 @@ from cue_eval.story_pool import choose_story_template, load_story_pool, render_s
 TEACHING_TURNS = 4
 
 
-def run_live_history_experiment(
+def run_experiment2_experiment(
     data_path: str | Path,
     dataset_name: str,
     output_dir: str | Path,
@@ -37,7 +37,7 @@ def run_live_history_experiment(
     story_pool = load_story_pool(story_pool_path)
 
     progress_path = output_path / "progress.log"
-    partial_csv_path = output_path / "live_history_results.partial.csv"
+    partial_csv_path = output_path / "experiment2_results.partial.csv"
     prompt_log_path = output_path / "model_prompts.jsonl"
     if partial_csv_path.exists():
         partial_csv_path.unlink()
@@ -83,12 +83,12 @@ def run_live_history_experiment(
                 ),
             )
 
-    _write_csv(output_path / "live_history_results.csv", rows)
+    _write_csv(output_path / "experiment2_results.csv", rows)
     _log(progress_path, f"Finished run. Wrote final CSV with {len(rows)} rows.")
     return rows
 
 
-def summarize_live_history(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Aggregate probe shortcut rate by dataset, reasoning mode, and held count."""
     summary: list[dict[str, Any]] = []
     datasets = sorted({row["dataset"] for row in rows})
@@ -118,13 +118,13 @@ def summarize_live_history(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return summary
 
 
-def write_live_history_outputs(output_dir: str | Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Write summary CSV and the two-panel methodology plot."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    summary = summarize_live_history(rows)
-    _write_csv(output_path / "live_history_summary.csv", summary)
-    _write_methodology_plot(output_path / "live_history_shortcut_rate.png", summary)
+    summary = summarize_experiment2(rows)
+    _write_csv(output_path / "experiment2_summary.csv", summary)
+    _write_methodology_plot(output_path / "experiment2_shortcut_rate.png", summary)
     return summary
 
 
@@ -348,8 +348,8 @@ def _model_or_dry_response(
     turn_index: int,
     is_probe: bool,
 ) -> str | None:
-    """Provide deterministic dry-run responses for graph testing."""
-    if provider not in {"dry-run", "mock"}:
+    """Provide deterministic dryrun responses for graph testing."""
+    if provider not in {"dryrun", "mock"}:
         return None
     target_held_count = episode_index % (TEACHING_TURNS + 1)
     if is_probe:
@@ -404,7 +404,7 @@ def _log_prompt_event(
         "turn_type": turn_type,
         "turn_index": turn_index,
         "example_id": example_id,
-        "sent_to_model": provider not in {"dry-run", "mock"},
+        "sent_to_model": provider not in {"dryrun", "mock"},
         "messages": messages,
     }
     _append_jsonl(path, event)

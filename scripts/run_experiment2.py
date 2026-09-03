@@ -11,7 +11,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.live_history import run_live_history_experiment, write_live_history_outputs
+from cue_eval.experiment2 import run_experiment2_experiment, write_experiment2_outputs
 
 
 def parse_args() -> argparse.Namespace:
@@ -19,12 +19,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run live-history cue-following comparison.")
     parser.add_argument(
         "--provider",
-        choices=["dry-run", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
-        default="dry-run",
+        choices=["dryrun", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
+        default="dryrun",
     )
     parser.add_argument("--model", default="qwen3-32b")
     parser.add_argument("--prepared-dir", default="data")
-    parser.add_argument("--output-dir", default="outputs/live_history_comparison")
+    parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=256)
@@ -42,7 +42,7 @@ def main() -> None:
 
     dataset = "math500"
     data_path = _prepared_path(dataset, args.limit, Path(args.prepared_dir))
-    all_rows = run_live_history_experiment(
+    all_rows = run_experiment2_experiment(
         data_path=data_path,
         dataset_name=dataset,
         output_dir=output_dir,
@@ -56,8 +56,8 @@ def main() -> None:
     )
     print(f"Ran {len(all_rows)} live-history episodes for {dataset}.")
 
-    _write_csv(output_dir / "all_live_history_results.csv", all_rows)
-    summary = write_live_history_outputs(output_dir, all_rows)
+    _write_csv(output_dir / "all_experiment2_results.csv", all_rows)
+    summary = write_experiment2_outputs(output_dir, all_rows)
     _write_full_results(output_dir / "full_results.csv", summary, args.model, args.provider)
     print(f"Wrote {len(summary)} summary rows to {output_dir.resolve()}")
 

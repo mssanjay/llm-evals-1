@@ -36,7 +36,7 @@ def run_experiment(
         for cue_count in cue_counts:
             story_template = choose_story_template(story_pool, cue_count, example_index)
             messages = build_messages(example, cue_count, story_template, reasoning=reasoning)
-            response = _demo_response(example, cue_count) if provider in {"dry-run", "mock"} else call_model(
+            response = _demo_response(example, cue_count) if provider in {"dryrun", "mock"} else call_model(
                 provider,
                 messages,
                 model=model,

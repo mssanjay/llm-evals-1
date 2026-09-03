@@ -20,14 +20,14 @@ python -m pip install -r requirements.txt
 Run the no-model demo first:
 
 ```powershell
-python scripts/run_experiment.py --provider dry-run
+python scripts/run_experiment.py --provider dryrun
 ```
 
 This writes `outputs/results.csv`, `outputs/summary.csv`, and `outputs/shortcut_rate.png` if `matplotlib` is installed.
 
-For the dataset experiments, `dry-run` is the no-model mode. It uses known answers from the prepared dataset to test the CSVs, scoring, and plots. It is not a real model result.
+For the dataset experiments, `dryrun` is the no-model mode. It uses known answers from the prepared dataset to test the CSVs, scoring, and plots. It is not a real model result.
 
-`mock` is also available as a short alias for no-model testing, but new commands should use `dry-run`.
+`mock` is also available as a short alias for no-model testing, but new commands should use `dryrun`.
 
 ## Prepared Dataset
 
@@ -59,7 +59,7 @@ Run it without calling a model:
 
 ```powershell
 python scripts/experiment_1.py `
-  --provider dry-run `
+  --provider dryrun `
   --skip-prepare `
   --prepared-dir data `
   --limit 100 `
@@ -91,7 +91,7 @@ Use this when you want two panels for reasoning on/off.
 
 ```powershell
 python scripts/run_math500_reasoning_cue_plot.py `
-  --provider dry-run `
+  --provider dryrun `
   --data data\math500_prepared_100.jsonl `
   --story-pool data\story_pool.jsonl `
   --limit 100 `
@@ -132,23 +132,24 @@ Each teaching turn now uses a complex story from `data/story_pool.jsonl`, follow
 Run it without calling a model:
 
 ```powershell
-python scripts/run_experiment_2.py `
-  --provider dry-run `
+python scripts/run_experiment2.py `
+  --provider dryrun `
+  --model qwen.qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --limit 100 `
-  --output-dir outputs\experiment_2_demo
+  --output-dir outputs\experiment2_dryrun
 ```
 
 This writes:
 
-- `outputs\experiment_2_demo\full_results.csv`
-- `outputs\experiment_2_demo\all_live_history_results.csv`
-- `outputs\experiment_2_demo\live_history_results.partial.csv`
-- `outputs\experiment_2_demo\model_prompts.jsonl`
-- `outputs\experiment_2_demo\live_history_summary.csv`
-- `outputs\experiment_2_demo\live_history_shortcut_rate.png`
-- `outputs\experiment_2_demo\progress.log`
+- `outputs\experiment2_dryrun\full_results.csv`
+- `outputs\experiment2_dryrun\all_experiment2_results.csv`
+- `outputs\experiment2_dryrun\experiment2_results.partial.csv`
+- `outputs\experiment2_dryrun\model_prompts.jsonl`
+- `outputs\experiment2_dryrun\experiment2_summary.csv`
+- `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
+- `outputs\experiment2_dryrun\progress.log`
 
 `full_results.csv` is the coach-friendly condition summary. Its first columns are:
 
@@ -173,31 +174,31 @@ The row-level CSV includes these labels:
 For slow local model runs, watch progress in another PowerShell window:
 
 ```powershell
-Get-Content outputs\experiment_2_demo\progress.log -Wait
+Get-Content outputs\experiment2_dryrun\progress.log -Wait
 ```
 
 The partial row-level CSV is updated after every completed episode:
 
 ```powershell
-Import-Csv outputs\experiment_2_demo\live_history_results.partial.csv | Select-Object -Last 5
+Import-Csv outputs\experiment2_dryrun\experiment2_results.partial.csv | Select-Object -Last 5
 ```
 
 The prompt log stores the full chat messages for each teaching/probe model request:
 
 ```powershell
-Get-Content outputs\experiment_2_demo\model_prompts.jsonl -Tail 1
+Get-Content outputs\experiment2_dryrun\model_prompts.jsonl -Tail 1
 ```
 
 Run Experiment 2 against Microsoft Foundry:
 
 ```powershell
-python scripts/run_experiment_2.py `
+python scripts/run_experiment2.py `
   --provider azure-foundry `
   --model qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --limit 100 `
-  --output-dir outputs\experiment_2_azure_ai
+  --output-dir outputs\experiment2_azure_ai
 ```
 
 ## Run with Ollama locally
@@ -223,7 +224,7 @@ python scripts/experiment_1.py --provider ollama --model qwen3:14b --skip-prepar
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment_2.py --provider ollama --model qwen3:14b --prepared-dir data --limit 100 --output-dir outputs\experiment_2_ollama
+python scripts/run_experiment2.py --provider ollama --model qwen3:14b --prepared-dir data --limit 100 --output-dir outputs\experiment2_ollama
 ```
 
 If Ollama is running somewhere else:
@@ -245,13 +246,13 @@ $env:OPENROUTER_APP_NAME="llm-cue-evals"
 Then run Experiment 2:
 
 ```powershell
-python scripts/run_experiment_2.py `
+python scripts/run_experiment2.py `
   --provider openrouter `
   --model qwen/qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --limit 100 `
-  --output-dir outputs\experiment_2_openrouter
+  --output-dir outputs\experiment2_openrouter
 ```
 
 For a smaller first check, use `--limit 5`. You can also pass `--model qwen3-32b`; the code maps it to OpenRouter's `qwen/qwen3-32b` slug.
@@ -272,14 +273,14 @@ $env:AWS_BEDROCK_REGION="us-east-1"
 Then run Experiment 2 with a model ID available on Bedrock Mantle:
 
 ```powershell
-python scripts/run_experiment_2.py `
+python scripts/run_experiment2.py `
   --provider aws `
   --model us.anthropic.claude-3-5-haiku-20241022-v1:0 `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --limit 100 `
   --max-tokens 1024 `
-  --output-dir outputs\experiment_2_bedrock
+  --output-dir outputs\experiment2_bedrock
 ```
 
 The `--model` value must be available for the Bedrock Mantle endpoint in your region. You can also override the full base URL:
@@ -342,7 +343,7 @@ python scripts/experiment_1.py --provider azure-foundry --model qwen3-32b --skip
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment_2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment_2_foundry
+python scripts/run_experiment2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment2_foundry
 ```
 
 The `--model` value must exactly match the deployment name shown in Foundry.
@@ -376,7 +377,7 @@ Run Experiment 1 as an Azure ML job without a model call:
   -WorkspaceName "YOUR-AZUREML-WORKSPACE" `
   -ComputeName "YOUR-COMPUTE-NAME" `
   -Experiment 1 `
-  -Provider dry-run
+  -Provider dryrun
 ```
 
 Run Experiment 2 as an Azure ML job against Foundry:
@@ -434,7 +435,7 @@ To generate the Azure ML job YAML without submitting:
   -WorkspaceName "YOUR-AZUREML-WORKSPACE" `
   -ComputeName "YOUR-COMPUTE-NAME" `
   -Experiment 2 `
-  -Provider dry-run `
+  -Provider dryrun `
   -NoSubmit
 ```
 
@@ -476,7 +477,7 @@ More detailed notebook instructions are in `docs/azure_notebook_setup.md`.
 
 Use the notebook or script in this order:
 
-1. Run the `dry-run` provider to explain the idea.
+1. Run the `dryrun` provider to explain the idea.
 2. Run Experiment 1 to show the simple bad-clue repetition effect.
 3. Run Experiment 2 to show the live-history teaching-turn methodology.
 4. Run Azure if you want the result to use the same hosted model every time.

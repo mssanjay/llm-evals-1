@@ -20,8 +20,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run cue-following on MATH-500.")
     parser.add_argument(
         "--provider",
-        choices=["dry-run", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
-        default="dry-run",
+        choices=["dryrun", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
+        default="dryrun",
     )
     parser.add_argument("--model", default="qwen3-32b")
     parser.add_argument("--output-dir", default="outputs/experiment_1_math500")

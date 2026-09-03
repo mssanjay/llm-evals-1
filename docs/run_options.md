@@ -8,12 +8,12 @@ Use the notebook:
 notebooks/simple_cue_eval_showcase.ipynb
 ```
 
-Start with `PROVIDER = "dry-run"` so the student can explain the idea without waiting for a model.
+Start with `PROVIDER = "dryrun"` so the student can explain the idea without waiting for a model.
 
 For the MATH-500 experiment without calling a model:
 
 ```powershell
-python scripts/experiment_1.py --provider dry-run --skip-prepare --prepared-dir data --limit 100
+python scripts/experiment_1.py --provider dryrun --skip-prepare --prepared-dir data --limit 100
 ```
 
 This is a dry run for checking the graph and scoring pipeline. It is not evidence about a model.
@@ -50,7 +50,7 @@ Use this when you want to avoid Azure setup and call a hosted model through Open
 
 ```powershell
 $env:OPENROUTER_API_KEY="sk-or-v1-YOUR-KEY"
-python scripts/run_experiment_2.py --provider openrouter --model qwen/qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment_2_openrouter
+python scripts/run_experiment2.py --provider openrouter --model qwen/qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment2_openrouter
 ```
 
 ## AWS Bedrock from your computer
@@ -60,7 +60,7 @@ Use this when you want the model hosted on AWS Bedrock through the Mantle OpenAI
 ```powershell
 $env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
-python scripts/run_experiment_2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --max-tokens 1024 --output-dir outputs\experiment_2_bedrock
+python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --max-tokens 1024 --output-dir outputs\experiment2_bedrock
 ```
 
 Use a Bedrock model ID that is available on Bedrock Mantle in your region.
@@ -90,7 +90,7 @@ az ml job create --file azureml/run_mock_job.yml
 
 Use this order:
 
-1. `dry-run` in the notebook.
+1. `dryrun` in the notebook.
 2. `ollama` locally if available.
 3. OpenRouter, Foundry, or Bedrock endpoint from your computer.
 4. Azure ML job only when you want the whole run in Azure.

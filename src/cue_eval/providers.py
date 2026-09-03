@@ -1,4 +1,4 @@
-"""Model providers for dry-run, mock, Ollama, OpenRouter, Bedrock, and Azure."""
+"""Model providers for dryrun, mock, Ollama, OpenRouter, Bedrock, and Azure."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ def call_model(
     max_tokens: int = 256,
 ) -> str:
     """Route a chat request to the selected provider."""
-    if provider == "dry-run":
-        raise ValueError("dry-run is handled by the experiment runner, not the model provider.")
+    if provider == "dryrun":
+        raise ValueError("dryrun is handled by the experiment runner, not the model provider.")
     if provider == "mock":
         return _mock_response(messages)
     if provider == "ollama":
