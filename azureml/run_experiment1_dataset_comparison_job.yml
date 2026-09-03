@@ -4,7 +4,7 @@ experiment_name: "cue-following-demo"
 description: "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
 code: ..
 command: >-
-  python scripts/run_dataset_comparison.py
+  python scripts/experiment_1.py
   --provider dry-run
   --skip-prepare
   --prepared-dir data

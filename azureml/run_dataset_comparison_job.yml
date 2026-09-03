@@ -4,7 +4,7 @@ experiment_name: "cue-following-demo"
 description: "Experiment 2: compare probe shortcut rate by how many teaching turns held the planted rule."
 code: ..
 command: >-
-  python scripts/run_live_history_comparison.py
+  python scripts/run_experiment_2.py
   --provider dry-run
   --prepared-dir data
   --story-pool data/story_pool.jsonl

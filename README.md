@@ -2,7 +2,7 @@
 
 This is a simple experiment for testing whether a language model follows a misleading clue from earlier in a conversation.
 
-The student-friendly question is:
+The experiment is:
 
 > Does the model solve the math problem, or does it copy the bad clue?
 
@@ -58,7 +58,7 @@ The default run now uses all cue counts from `0` through `10`.
 Run it without calling a model:
 
 ```powershell
-python scripts/run_dataset_comparison.py `
+python scripts/experiment_1.py `
   --provider dry-run `
   --skip-prepare `
   --prepared-dir data `
@@ -76,7 +76,7 @@ This writes:
 Run Experiment 1 against Microsoft Foundry:
 
 ```powershell
-python scripts/run_dataset_comparison.py `
+python scripts/experiment_1.py `
   --provider azure-foundry `
   --model qwen3-32b `
   --skip-prepare `
@@ -132,7 +132,7 @@ Each teaching turn now uses a complex story from `data/story_pool.jsonl`, follow
 Run it without calling a model:
 
 ```powershell
-python scripts/run_live_history_comparison.py `
+python scripts/run_experiment_2.py `
   --provider dry-run `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
@@ -191,7 +191,7 @@ Get-Content outputs\experiment_2_demo\model_prompts.jsonl -Tail 1
 Run Experiment 2 against Microsoft Foundry:
 
 ```powershell
-python scripts/run_live_history_comparison.py `
+python scripts/run_experiment_2.py `
   --provider azure-foundry `
   --model qwen3-32b `
   --prepared-dir data `
@@ -217,13 +217,13 @@ python scripts/run_experiment.py --provider ollama --model qwen3:14b
 For Experiment 1:
 
 ```powershell
-python scripts/run_dataset_comparison.py --provider ollama --model qwen3:14b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_ollama
+python scripts/experiment_1.py --provider ollama --model qwen3:14b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_ollama
 ```
 
 For Experiment 2:
 
 ```powershell
-python scripts/run_live_history_comparison.py --provider ollama --model qwen3:14b --prepared-dir data --limit 100 --output-dir outputs\experiment_2_ollama
+python scripts/run_experiment_2.py --provider ollama --model qwen3:14b --prepared-dir data --limit 100 --output-dir outputs\experiment_2_ollama
 ```
 
 If Ollama is running somewhere else:
@@ -245,7 +245,7 @@ $env:OPENROUTER_APP_NAME="llm-cue-evals"
 Then run Experiment 2:
 
 ```powershell
-python scripts/run_live_history_comparison.py `
+python scripts/run_experiment_2.py `
   --provider openrouter `
   --model qwen/qwen3-32b `
   --prepared-dir data `
@@ -272,7 +272,7 @@ $env:AWS_BEDROCK_REGION="us-east-1"
 Then run Experiment 2 with a model ID available on Bedrock Mantle:
 
 ```powershell
-python scripts/run_live_history_comparison.py `
+python scripts/run_experiment_2.py `
   --provider aws `
   --model us.anthropic.claude-3-5-haiku-20241022-v1:0 `
   --prepared-dir data `
@@ -336,13 +336,13 @@ python scripts/run_experiment.py --provider azure-foundry --model qwen3-32b
 For Experiment 1:
 
 ```powershell
-python scripts/run_dataset_comparison.py --provider azure-foundry --model qwen3-32b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_foundry
+python scripts/experiment_1.py --provider azure-foundry --model qwen3-32b --skip-prepare --prepared-dir data --limit 100 --output-dir outputs\experiment_1_foundry
 ```
 
 For Experiment 2:
 
 ```powershell
-python scripts/run_live_history_comparison.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment_2_foundry
+python scripts/run_experiment_2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment_2_foundry
 ```
 
 The `--model` value must exactly match the deployment name shown in Foundry.

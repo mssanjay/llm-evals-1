@@ -66,7 +66,7 @@ if (-not $AwsRegion) {
     $AwsRegion = $env:AWS_DEFAULT_REGION
 }
 
-$runner = if ($Experiment -eq 1) { "scripts/run_dataset_comparison.py" } else { "scripts/run_live_history_comparison.py" }
+$runner = if ($Experiment -eq 1) { "scripts/experiment_1.py" } else { "scripts/run_experiment_2.py" }
 $displayName = if ($Experiment -eq 1) { "experiment-1-multiturn-story-comparison" } else { "experiment-2-live-history-comparison" }
 $description = if ($Experiment -eq 1) {
     "Experiment 1: compare shortcut rate by wrong-answer cue count inside one story."
