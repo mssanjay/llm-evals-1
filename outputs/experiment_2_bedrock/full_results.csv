@@ -1,0 +1,11 @@
+Model,Provider,Dataset,Cue type,History,Reasoning,Story,n,rule_held_count,shortcut_count,shortcut_rate
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,off,rule_held_count=0,24,0,6,0.25
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,off,rule_held_count=1,20,1,9,0.45
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,off,rule_held_count=2,14,2,11,0.7857142857142857
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,off,rule_held_count=3,14,3,10,0.7142857142857143
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,off,rule_held_count=4,24,4,22,0.9166666666666666
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,on,rule_held_count=0,80,0,1,0.0125
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,on,rule_held_count=1,15,1,0,0.0
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,on,rule_held_count=2,1,2,0,0.0
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,on,rule_held_count=3,0,3,0,0.0
+qwen.qwen3-32b,aws,math500,wrong_answer_shortcut_cue,live-history teaching turns,on,rule_held_count=4,0,4,0,0.0

@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ComputeName,
 
-    [ValidateSet("dry-run", "mock", "openrouter", "azure-foundry", "azure-ai", "azure-openai")]
+    [ValidateSet("dry-run", "mock", "openrouter", "aws", "azure-foundry", "azure-ai", "azure-openai")]
     [string]$Provider = "dry-run",
 
     [ValidateSet(1, 2)]
@@ -28,6 +28,9 @@ param(
     [string]$OpenRouterBaseUrl = $env:OPENROUTER_BASE_URL,
     [string]$OpenRouterSiteUrl = $env:OPENROUTER_SITE_URL,
     [string]$OpenRouterAppName = $env:OPENROUTER_APP_NAME,
+    [string]$AwsRegion = $env:AWS_BEDROCK_REGION,
+    [string]$AwsBearerTokenBedrock = $env:AWS_BEARER_TOKEN_BEDROCK,
+    [string]$AwsBedrockMantleBaseUrl = $env:AWS_BEDROCK_MANTLE_BASE_URL,
     [switch]$PrepareDatasets,
     [switch]$NoSubmit
 )
@@ -53,6 +56,14 @@ if (-not $OpenRouterBaseUrl) {
 
 if (-not $OpenRouterAppName) {
     $OpenRouterAppName = "llm-cue-evals"
+}
+
+if (-not $AwsRegion) {
+    $AwsRegion = $env:AWS_REGION
+}
+
+if (-not $AwsRegion) {
+    $AwsRegion = $env:AWS_DEFAULT_REGION
 }
 
 $runner = if ($Experiment -eq 1) { "scripts/run_dataset_comparison.py" } else { "scripts/run_live_history_comparison.py" }
@@ -128,6 +139,23 @@ if ($Provider -eq "openrouter") {
     )
     if ($OpenRouterSiteUrl) {
         $lines += "  OPENROUTER_SITE_URL: `"$OpenRouterSiteUrl`""
+    }
+}
+
+if ($Provider -eq "aws") {
+    if (-not $AwsRegion) {
+        throw "Set AWS_BEDROCK_REGION, AWS_REGION, or AWS_DEFAULT_REGION, or pass -AwsRegion."
+    }
+    if (-not $AwsBearerTokenBedrock) {
+        throw "Set AWS_BEARER_TOKEN_BEDROCK before submitting an Azure ML job that calls Bedrock Mantle."
+    }
+    $lines += @(
+        'environment_variables:',
+        "  AWS_BEDROCK_REGION: `"$AwsRegion`"",
+        "  AWS_BEARER_TOKEN_BEDROCK: `"$AwsBearerTokenBedrock`""
+    )
+    if ($AwsBedrockMantleBaseUrl) {
+        $lines += "  AWS_BEDROCK_MANTLE_BASE_URL: `"$AwsBedrockMantleBaseUrl`""
     }
 }
 

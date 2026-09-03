@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Plot Math500 shortcut counts by cue count.")
     parser.add_argument(
         "--provider",
-        choices=["dry-run", "mock", "ollama", "openrouter", "azure-foundry", "azure-openai", "azure-ai"],
+        choices=["dry-run", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
         default="dry-run",
     )
     parser.add_argument("--model", default="qwen3-32b")

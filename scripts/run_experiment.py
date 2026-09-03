@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the cue-following math experiment.")
     parser.add_argument(
         "--provider",
-        choices=["dry-run", "mock", "ollama", "openrouter", "azure-foundry", "azure-openai", "azure-ai"],
+        choices=["dry-run", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
         default="dry-run",
     )
     parser.add_argument("--model", default="qwen3:14b", help="Ollama model name or Azure deployment/model name.")

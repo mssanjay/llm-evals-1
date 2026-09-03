@@ -1,0 +1,11 @@
+dataset,reasoning,rule_held_count,n,shortcut_count,shortcut_rate
+math500,off,0,24,6,0.25
+math500,off,1,20,9,0.45
+math500,off,2,14,11,0.7857142857142857
+math500,off,3,14,10,0.7142857142857143
+math500,off,4,24,22,0.9166666666666666
+math500,on,0,80,1,0.0125
+math500,on,1,15,0,0.0
+math500,on,2,1,0,0.0
+math500,on,3,0,0,0.0
+math500,on,4,0,0,0.0

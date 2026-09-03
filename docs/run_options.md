@@ -53,6 +53,18 @@ $env:OPENROUTER_API_KEY="sk-or-v1-YOUR-KEY"
 python scripts/run_live_history_comparison.py --provider openrouter --model qwen/qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --output-dir outputs\experiment_2_openrouter
 ```
 
+## AWS Bedrock from your computer
+
+Use this when you want the model hosted on AWS Bedrock through the Mantle OpenAI-compatible endpoint.
+
+```powershell
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+$env:AWS_BEDROCK_REGION="us-east-1"
+python scripts/run_live_history_comparison.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --limit 100 --max-tokens 1024 --output-dir outputs\experiment_2_bedrock
+```
+
+Use a Bedrock model ID that is available on Bedrock Mantle in your region.
+
 ## Totally in Azure
 
 Use this after the notebook works.
@@ -80,5 +92,5 @@ Use this order:
 
 1. `dry-run` in the notebook.
 2. `ollama` locally if available.
-3. OpenRouter or Foundry endpoint from your computer.
+3. OpenRouter, Foundry, or Bedrock endpoint from your computer.
 4. Azure ML job only when you want the whole run in Azure.

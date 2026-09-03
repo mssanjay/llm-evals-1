@@ -256,6 +256,38 @@ python scripts/run_live_history_comparison.py `
 
 For a smaller first check, use `--limit 5`. You can also pass `--model qwen3-32b`; the code maps it to OpenRouter's `qwen/qwen3-32b` slug.
 
+## Run with AWS Bedrock
+
+Set your Bedrock API key and region. The `aws` provider uses the Bedrock Mantle OpenAI-compatible endpoint:
+
+```text
+https://bedrock-mantle.YOUR-REGION.api.aws/v1/chat/completions
+```
+
+```powershell
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+$env:AWS_BEDROCK_REGION="us-east-1"
+```
+
+Then run Experiment 2 with a model ID available on Bedrock Mantle:
+
+```powershell
+python scripts/run_live_history_comparison.py `
+  --provider aws `
+  --model us.anthropic.claude-3-5-haiku-20241022-v1:0 `
+  --prepared-dir data `
+  --story-pool data\story_pool.jsonl `
+  --limit 100 `
+  --max-tokens 1024 `
+  --output-dir outputs\experiment_2_bedrock
+```
+
+The `--model` value must be available for the Bedrock Mantle endpoint in your region. You can also override the full base URL:
+
+```powershell
+$env:AWS_BEDROCK_MANTLE_BASE_URL="https://bedrock-mantle.us-east-1.api.aws/v1"
+```
+
 ## Run with Azure OpenAI style endpoint
 
 Set:
@@ -376,6 +408,23 @@ $env:OPENROUTER_API_KEY="sk-or-v1-YOUR-KEY"
   -Provider openrouter `
   -Model qwen/qwen3-32b
 ```
+
+Run Experiment 2 as an Azure ML job against AWS Bedrock:
+
+```powershell
+$env:AWS_BEDROCK_REGION="us-east-1"
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
+
+.\scripts\deploy_azureml.ps1 `
+  -ResourceGroup "YOUR-RESOURCE-GROUP" `
+  -WorkspaceName "YOUR-AZUREML-WORKSPACE" `
+  -ComputeName "YOUR-COMPUTE-NAME" `
+  -Experiment 2 `
+  -Provider aws `
+  -Model us.anthropic.claude-3-5-haiku-20241022-v1:0
+```
+
+For a real shared project, prefer a secret store instead of hard-coding Bedrock API keys.
 
 To generate the Azure ML job YAML without submitting:
 

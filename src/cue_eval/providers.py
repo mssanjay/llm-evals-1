@@ -1,4 +1,4 @@
-"""Model providers for dry-run, mock, Ollama, OpenRouter, and Azure-hosted runs."""
+"""Model providers for dry-run, mock, Ollama, OpenRouter, Bedrock, and Azure."""
 
 from __future__ import annotations
 
@@ -26,6 +26,8 @@ def call_model(
         return _call_ollama(messages, model=model, temperature=temperature, max_tokens=max_tokens)
     if provider == "openrouter":
         return _call_openrouter(messages, model=model, temperature=temperature, max_tokens=max_tokens)
+    if provider == "aws":
+        return _call_bedrock(messages, model=model, temperature=temperature, max_tokens=max_tokens)
     if provider == "azure-foundry":
         return _call_azure_foundry(messages, model=model, temperature=temperature, max_tokens=max_tokens)
     if provider == "azure-openai":
@@ -88,6 +90,34 @@ def _call_openrouter(messages: list[dict[str, str]], model: str, temperature: fl
         headers["X-OpenRouter-Title"] = app_name
     data = _post_json(endpoint, payload, headers=headers)
     return _chat_message_content(data, "OpenRouter")
+
+
+def _call_bedrock(messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int) -> str:
+    """Call the Bedrock Mantle OpenAI-compatible chat-completions endpoint."""
+    api_key = (
+        os.getenv("AWS_BEARER_TOKEN_BEDROCK")
+        or os.getenv("AWS_BEDROCK_API_KEY")
+        or os.getenv("BEDROCK_API_KEY")
+    )
+    if not api_key:
+        raise RuntimeError(
+            "Set AWS_BEARER_TOKEN_BEDROCK before using --provider aws with Bedrock Mantle."
+        )
+
+    region = os.getenv("AWS_BEDROCK_REGION") or os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
+    endpoint = _bedrock_mantle_chat_url(os.getenv("AWS_BEDROCK_MANTLE_BASE_URL"), region)
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    data = _post_json(endpoint, payload, headers=headers)
+    return _chat_message_content(data, "Bedrock Mantle")
 
 
 def _call_azure_openai(
@@ -176,6 +206,20 @@ def _openrouter_chat_url(endpoint: str) -> str:
     if base.endswith("/chat/completions"):
         return base
     return f"{base}/chat/completions"
+
+
+def _bedrock_mantle_chat_url(base_url: str | None, region: str | None) -> str:
+    """Build the Bedrock Mantle chat-completions URL."""
+    if base_url:
+        base = base_url.rstrip("/")
+        if base.endswith("/chat/completions"):
+            return base
+        if base.endswith("/v1"):
+            return f"{base}/chat/completions"
+        return f"{base}/v1/chat/completions"
+    if not region:
+        raise RuntimeError("Set AWS_BEDROCK_REGION, AWS_REGION, or AWS_DEFAULT_REGION.")
+    return f"https://bedrock-mantle.{region}.api.aws/v1/chat/completions"
 
 
 def _foundry_chat_url(endpoint: str) -> str:
