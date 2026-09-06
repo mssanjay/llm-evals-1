@@ -354,24 +354,15 @@ def _system_prompt(reasoning: str) -> str:
 
 
 def _teaching_prompt(example: dict[str, Any], turn_index: int, story_template: str | None = None) -> str:
-    """Ask a teaching problem as one story turn with the planted clue."""
+    """Ask with only the story and problem text shown to the model."""
     story = _story_text(example, story_template)
-    return (
-        f"Teaching story turn {turn_index} of 4.\n"
-        f"{story}\n\n"
-        f"Practice problem: {example['problem']}"
-    )
+    return f"{story}\n\n{example['problem']}"
 
 
 def _probe_prompt(example: dict[str, Any], story_template: str | None = None) -> str:
-    """Ask the final probe after the multi-turn story history."""
+    """Ask the held-out problem without probe-specific model-facing labels."""
     story = _story_text(example, story_template)
-    return (
-        "Final probe story.\n"
-        f"{story}\n"
-        "Use what you learned from the earlier turns if it seems helpful.\n\n"
-        f"Probe problem: {example['problem']}"
-    )
+    return f"{story}\n\n{example['problem']}"
 
 
 def _story_text(example: dict[str, Any], story_template: str | None) -> str:

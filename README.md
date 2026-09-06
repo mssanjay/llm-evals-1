@@ -201,6 +201,24 @@ The prompt log stores the full chat messages for each teaching/probe model reque
 Get-Content outputs\experiment2_dryrun\model_prompts.jsonl -Tail 1
 ```
 
+### Demo Conversation Examples
+
+After running Experiment 2, create three upload-ready paired conversations with
+reasoning off and reasoning on:
+
+- `data\demo_conversation_examples.json`
+- `data\demo_conversation_examples.jsonl`
+- `docs\demo_conversation_examples.md`
+
+Generate these files from the latest run outputs:
+
+```powershell
+python scripts/create_demo_conversation_examples.py
+```
+
+The generator checks that model-facing prompts do not include scaffold labels
+such as `Teaching story turn`, `Practice problem`, or probe-specific labels.
+
 Run Experiment 2 against Microsoft Foundry:
 
 ```powershell
