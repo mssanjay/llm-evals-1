@@ -8,17 +8,27 @@ from __future__ import annotations
 
 import csv
 import json
+import math
+import sys
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = ROOT / "outputs" / "experiment_2_bedrock"
+sys.path.insert(0, str(ROOT / "src"))
+
+from cue_eval.scoring import extract_final_number
+
+
+SOURCE_DIR = ROOT / "outputs" / "experiment_2_bedrock_run2"
 PROMPT_LOG = SOURCE_DIR / "model_prompts.jsonl"
 RESULTS_CSV = SOURCE_DIR / "all_experiment2_results.csv"
-DATA_OUT = ROOT / "data" / "demo_conversation_examples.json"
-JSONL_OUT = ROOT / "data" / "demo_conversation_examples.jsonl"
-DOC_OUT = ROOT / "docs" / "demo_conversation_examples.md"
+
+OUTPUT_DIR = ROOT / "outputs" / "experiment_2_bedrock_run2"
+DATA_OUT = OUTPUT_DIR / "demo_conversation_examples.json"
+JSONL_OUT = OUTPUT_DIR / "demo_conversation_examples.jsonl"
+DOC_OUT = OUTPUT_DIR / "demo_conversation_examples.md"
+
 BANNED_MODEL_PROMPT_SCAFFOLD = (
     "Teaching story turn",
     "Practice problem:",
@@ -72,32 +82,81 @@ def find_result_row(
     return matches[0]
 
 
-def find_prompt_entry(
+def find_prompt_sequence(
     entries: list[dict[str, Any]],
-    *,
-    reasoning: str,
-    cue_count: int,
-    episode_index: int,
-    turn_type: str,
-    turn_index: int,
-) -> dict[str, Any]:
-    """Find one exact request payload from the prompt log."""
-
-    matches = [
+    row: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Find the latest complete retry sequence matching one result row."""
+    reasoning = row["reasoning"]
+    cue_count = int(row["cue_count"])
+    episode_index = int(row["episode_index"])
+    episode_entries = [
         entry
         for entry in entries
         if entry["reasoning"] == reasoning
         and int(entry["cue_count"]) == cue_count
         and int(entry["episode_index"]) == episode_index
-        and entry["turn_type"] == turn_type
-        and int(entry["turn_index"]) == turn_index
     ]
-    if len(matches) != 1:
+    expected_turns = [
+        ("teaching", 1),
+        ("teaching", 2),
+        ("teaching", 3),
+        ("teaching", 4),
+        ("probe", 0),
+    ]
+    candidates: list[list[dict[str, Any]]] = []
+    for start in range(len(episode_entries) - len(expected_turns) + 1):
+        candidate = episode_entries[start : start + len(expected_turns)]
+        actual_turns = [
+            (entry["turn_type"], int(entry["turn_index"])) for entry in candidate
+        ]
+        if actual_turns == expected_turns and _sequence_matches_result(candidate, row):
+            candidates.append(candidate)
+
+    if not candidates:
         raise ValueError(
-            f"Expected one prompt for {reasoning=} {cue_count=} "
-            f"{episode_index=} {turn_type=} {turn_index=}; found {len(matches)}"
+            f"Expected one complete prompt sequence for {reasoning=} {cue_count=} "
+            f"{episode_index=}; found 0"
         )
-    return matches[0]
+    return candidates[-1]
+
+
+def _sequence_matches_result(
+    entries: list[dict[str, Any]], row: dict[str, str]
+) -> bool:
+    """Check prompt text, chat history, and parsed teaching answers."""
+    expected_prompts = [row[f"teaching_prompt_{index}"] for index in range(1, 5)]
+    expected_prompts.append(row["probe_prompt"])
+    for entry, expected_prompt in zip(entries, expected_prompts):
+        messages = entry.get("messages", [])
+        if not messages or messages[-1] != {"role": "user", "content": expected_prompt}:
+            return False
+
+    try:
+        responses = [
+            response_from_next_request(entries[index], entries[index + 1])
+            for index in range(4)
+        ]
+    except ValueError:
+        return False
+
+    return all(
+        _answer_matches(response, row[f"teaching_answer_{index + 1}"])
+        for index, response in enumerate(responses)
+    )
+
+
+def _answer_matches(response: str, expected_answer: str) -> bool:
+    """Compare a recovered response with its recorded parsed answer."""
+    parsed_answer = extract_final_number(response)
+    if not expected_answer:
+        return parsed_answer is None
+    return parsed_answer is not None and math.isclose(
+        parsed_answer,
+        float(expected_answer),
+        rel_tol=1e-6,
+        abs_tol=1e-6,
+    )
 
 
 def response_from_next_request(
@@ -107,7 +166,11 @@ def response_from_next_request(
 
     current_len = len(current_entry["messages"])
     next_messages = next_entry["messages"]
-    if len(next_messages) <= current_len or next_messages[current_len]["role"] != "assistant":
+    if (
+        len(next_messages) <= current_len
+        or next_messages[:current_len] != current_entry["messages"]
+        or next_messages[current_len]["role"] != "assistant"
+    ):
         raise ValueError("Next request does not contain the expected assistant reply.")
     return next_messages[current_len]["content"]
 
@@ -121,27 +184,7 @@ def build_mode_example(
     cue_count = int(row["cue_count"])
     episode_index = int(row["episode_index"])
 
-    entries = [
-        find_prompt_entry(
-            prompt_entries,
-            reasoning=reasoning,
-            cue_count=cue_count,
-            episode_index=episode_index,
-            turn_type="teaching",
-            turn_index=index,
-        )
-        for index in range(1, 5)
-    ]
-    entries.append(
-        find_prompt_entry(
-            prompt_entries,
-            reasoning=reasoning,
-            cue_count=cue_count,
-            episode_index=episode_index,
-            turn_type="probe",
-            turn_index=0,
-        )
-    )
+    entries = find_prompt_sequence(prompt_entries, row)
 
     teaching_labels = [row[f"teaching_label_{index}"] for index in range(1, 5)]
     teaching_answers = [row[f"teaching_answer_{index}"] for index in range(1, 5)]

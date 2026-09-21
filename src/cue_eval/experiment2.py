@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,12 +18,138 @@ from cue_eval.story_pool import choose_story_template, load_story_pool, render_s
 
 
 TEACHING_TURNS = 4
+CHECKPOINT_VERSION = 1
 PROBE_RESPONSE_CATEGORIES = (
     ("correct", "correct_count", "Correct answer", "#2ca02c"),
     ("followed_bad_clue", "shortcut_count", "Shortcut cue taken", "#d62728"),
     ("other_wrong_answer", "other_wrong_answer_count", "Other wrong answer", "#ff7f0e"),
     ("parse_fail", "no_response_count", "No response", "#7f7f7f"),
 )
+
+
+def _checkpoint_config(
+    data_path: str | Path,
+    story_pool_path: str | Path | None,
+    dataset_name: str,
+    provider: str,
+    model: str,
+    temperature: float,
+    max_tokens: int,
+    reasoning_modes: list[str],
+    cue_counts: list[int],
+    episode_count: int,
+) -> dict[str, Any]:
+    """Capture settings that must match before checkpoint rows can be reused."""
+    return {
+        "checkpoint_version": CHECKPOINT_VERSION,
+        "dataset": dataset_name,
+        "data_sha256": _file_sha256(data_path),
+        "story_pool_sha256": _file_sha256(story_pool_path) if story_pool_path else None,
+        "provider": provider,
+        "model": model,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "reasoning_modes": reasoning_modes,
+        "cue_counts": cue_counts,
+        "episode_count": episode_count,
+        "teaching_turns": TEACHING_TURNS,
+    }
+
+
+def _file_sha256(path: str | Path) -> str:
+    """Hash an input file so changed data cannot reuse an older checkpoint."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _load_or_create_checkpoint(
+    partial_csv_path: Path,
+    checkpoint_path: Path,
+    config: dict[str, Any],
+    expected_tasks: dict[tuple[str, str, int, int], str],
+    adopt_legacy_checkpoint: bool,
+) -> list[dict[str, Any]]:
+    """Validate checkpoint metadata and recover complete, unique result rows."""
+    if partial_csv_path.exists() and not checkpoint_path.exists():
+        if not adopt_legacy_checkpoint:
+            raise ValueError(
+                f"Found {partial_csv_path} without checkpoint metadata. "
+                "Use --adopt-checkpoint if it belongs to these settings, or use --fresh."
+            )
+        rows = _load_partial_rows(partial_csv_path, expected_tasks)
+        _write_checkpoint_metadata(checkpoint_path, config)
+        return rows
+
+    if checkpoint_path.exists():
+        saved_config = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        if saved_config != config:
+            changed = sorted(key for key in config if saved_config.get(key) != config[key])
+            raise ValueError(
+                f"Checkpoint settings changed ({', '.join(changed)}). "
+                "Use --fresh or choose a new output directory."
+            )
+    else:
+        _write_checkpoint_metadata(checkpoint_path, config)
+
+    if not partial_csv_path.exists():
+        return []
+    return _load_partial_rows(partial_csv_path, expected_tasks)
+
+
+def _write_checkpoint_metadata(path: Path, config: dict[str, Any]) -> None:
+    """Write checkpoint metadata atomically before model calls begin."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    temporary_path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary_path.replace(path)
+
+
+def _load_partial_rows(
+    path: Path,
+    expected_tasks: dict[tuple[str, str, int, int], str],
+) -> list[dict[str, Any]]:
+    """Load valid checkpoint rows and repair a truncated final CSV record."""
+    rows_by_key: dict[tuple[str, str, int, int], dict[str, Any]] = {}
+    discarded_rows = 0
+    with path.open("r", newline="", encoding="utf-8") as file:
+        for row in csv.DictReader(file):
+            if None in row or any(value is None for value in row.values()):
+                discarded_rows += 1
+                continue
+            try:
+                key = _result_key(row)
+            except (KeyError, TypeError, ValueError):
+                discarded_rows += 1
+                continue
+            if key not in expected_tasks or row.get("probe_id") != expected_tasks[key]:
+                raise ValueError(
+                    f"Checkpoint row {key} does not match this run. "
+                    "Use --fresh or choose a new output directory."
+                )
+            if key in rows_by_key:
+                discarded_rows += 1
+            rows_by_key[key] = row
+
+    rows = list(rows_by_key.values())
+    if discarded_rows:
+        if rows:
+            _write_csv(path, rows)
+        else:
+            path.unlink()
+    return rows
+
+
+def _result_key(row: dict[str, Any]) -> tuple[str, str, int, int]:
+    """Identify one independently resumable experiment episode."""
+    return (
+        str(row["dataset"]),
+        str(row["reasoning"]),
+        int(row["cue_count"]),
+        int(row["episode_index"]),
+    )
 
 
 def run_experiment2_experiment(
@@ -37,8 +164,10 @@ def run_experiment2_experiment(
     cue_counts: list[int] | None = None,
     max_workers: int = 4,
     story_pool_path: str | Path | None = None,
+    resume: bool = True,
+    adopt_legacy_checkpoint: bool = False,
 ) -> list[dict[str, Any]]:
-    """Run live teaching conversations and save row-level probe results."""
+    """Run live teaching conversations, resuming completed episodes when possible."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     examples = load_examples(data_path)
@@ -50,36 +179,65 @@ def run_experiment2_experiment(
 
     progress_path = output_path / "progress.log"
     partial_csv_path = output_path / "experiment2_results.partial.csv"
+    checkpoint_path = output_path / "experiment2_checkpoint.json"
     prompt_log_path = output_path / "model_prompts.jsonl"
-    if partial_csv_path.exists():
-        partial_csv_path.unlink()
-    if progress_path.exists():
-        progress_path.unlink()
-    if prompt_log_path.exists():
-        prompt_log_path.unlink()
+    checkpoint_config = _checkpoint_config(
+        data_path=data_path,
+        story_pool_path=story_pool_path,
+        dataset_name=dataset_name,
+        provider=provider,
+        model=model,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        reasoning_modes=reasoning_modes,
+        cue_counts=cue_counts,
+        episode_count=len(episodes),
+    )
+    expected_tasks = {
+        (dataset_name, reasoning, cue_count, episode_index): episode[TEACHING_TURNS]["id"]
+        for reasoning in reasoning_modes
+        for cue_count in cue_counts
+        for episode_index, episode in enumerate(episodes)
+    }
+
+    if not resume:
+        for path in (partial_csv_path, checkpoint_path, progress_path, prompt_log_path):
+            if path.exists():
+                path.unlink()
+
+    rows = _load_or_create_checkpoint(
+        partial_csv_path,
+        checkpoint_path,
+        checkpoint_config,
+        expected_tasks,
+        adopt_legacy_checkpoint,
+    )
+    completed_keys = {_result_key(row) for row in rows}
+    total_tasks = len(expected_tasks)
     _log(
         progress_path,
         (
-            f"Starting live-history run provider={provider} model={model} "
+            f"{'Resuming' if rows else 'Starting'} live-history run provider={provider} model={model} "
             f"examples={len(examples)} episodes_per_reasoning={len(episodes)} "
             f"reasoning_modes={','.join(reasoning_modes)} "
             f"cue_counts={','.join(str(value) for value in cue_counts)} "
-            f"max_workers={max_workers}"
+            f"max_workers={max_workers} completed={len(rows)} remaining={total_tasks - len(rows)}"
         ),
         write_lock,
     )
 
-    rows: list[dict[str, Any]] = []
-    total_tasks = len(reasoning_modes) * len(cue_counts) * len(episodes)
+    failed_tasks = 0
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
+        futures = {}
         for reasoning in reasoning_modes:
             _log(progress_path, f"Queueing reasoning={reasoning}", write_lock)
             for cue_count in cue_counts:
                 _log(progress_path, f"Queueing reasoning={reasoning} cue_count={cue_count}", write_lock)
                 for episode_index, episode in enumerate(episodes):
-                    futures.append(
-                        executor.submit(
+                    task_key = (dataset_name, reasoning, cue_count, episode_index)
+                    if task_key in completed_keys:
+                        continue
+                    future = executor.submit(
                             _run_episode,
                             episode=episode,
                             episode_index=episode_index,
@@ -96,16 +254,33 @@ def run_experiment2_experiment(
                             prompt_log_path=prompt_log_path,
                             write_lock=write_lock,
                         )
-                    )
+                    futures[future] = task_key
 
-        for completed, future in enumerate(as_completed(futures), start=1):
-            row = future.result()
+        for future in as_completed(futures):
+            task_key = futures[future]
+            try:
+                row = future.result()
+            except Exception as error:
+                failed_tasks += 1
+                _, failed_reasoning, failed_cue_count, failed_episode_index = task_key
+                _log(
+                    progress_path,
+                    (
+                        "Episode failed and will be retried on resume: "
+                        f"reasoning={failed_reasoning} cue_count={failed_cue_count} "
+                        f"episode={failed_episode_index + 1}/{len(episodes)} "
+                        f"{type(error).__name__}: {error}"
+                    ),
+                    write_lock,
+                )
+                continue
             rows.append(row)
+            completed_keys.add(_result_key(row))
             _append_csv(partial_csv_path, row, write_lock)
             _log(
                 progress_path,
                 (
-                    f"Saved partial row {completed}/{total_tasks} "
+                    f"Saved checkpoint row {len(rows)}/{total_tasks} "
                     f"reasoning={row['reasoning']} cue_count={row['cue_count']} "
                     f"episode={int(row['episode_index']) + 1}/{len(episodes)} "
                     f"probe_label={row['probe_label']}"
@@ -114,6 +289,14 @@ def run_experiment2_experiment(
             )
 
     rows.sort(key=lambda row: (row["reasoning"], int(row["cue_count"]), int(row["episode_index"])))
+    if failed_tasks:
+        message = (
+            f"{failed_tasks} episode(s) failed; {len(rows)}/{total_tasks} completed rows are checkpointed. "
+            "Rerun the same command to retry only unfinished episodes."
+        )
+        _log(progress_path, message, write_lock)
+        raise RuntimeError(message)
+
     _write_csv(output_path / "experiment2_results.csv", rows)
     _log(progress_path, f"Finished run. Wrote final CSV with {len(rows)} rows.", write_lock)
     return rows

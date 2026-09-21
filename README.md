@@ -51,7 +51,7 @@ The prepared 50-line dataset and story pool are stored here:
 - `data/math500_prepared_50.jsonl`
 - `data/story_pool.jsonl`
 
-The story pool has 5 complex story templates for each cue count from 1 through 10. Each story uses `{wrong_answer_shortcut_cue}` exactly the requested number of times.
+The story pool has 5 complex story templates for each cue count from 1 through 10. Each template is 60-100 words and uses `{wrong_answer_shortcut_cue}` exactly the requested number of times.
 
 Regenerate them from Hugging Face:
 
@@ -137,7 +137,7 @@ For each episode:
 5. Count whether the probe answer copied the wrong-answer cue.
 6. Plot shortcut count against cue count.
 
-Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10. The output CSV saves `teaching_prompt_1` through `teaching_prompt_4` and `probe_prompt` so the full conversation can be inspected.
+Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_4` and `probe_prompt` so the full conversation can be inspected.
 
 Run it without calling a model:
 
@@ -150,6 +150,8 @@ python scripts/run_experiment2.py `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --output-dir outputs\experiment2_dryrun
 ```
+
+Experiment 2 checkpoints every completed episode in the output directory. If a run fails, rerun the same command to skip completed episodes and retry only unfinished work. Resume is allowed only when the model, provider, input files, cue counts, and generation settings match. Add `--fresh` to discard the checkpoint and start over. For a partial CSV created by an older version, rerun once with `--adopt-checkpoint`; use this only when the partial file came from the same command settings.
 
 This writes:
 
@@ -302,7 +304,7 @@ https://bedrock-mantle.YOUR-REGION.api.aws/v1/chat/completions
 ```
 
 ```powershell
-$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
 ```
 
@@ -450,7 +452,7 @@ Run Experiment 2 as an Azure ML job against AWS Bedrock:
 
 ```powershell
 $env:AWS_BEDROCK_REGION="us-east-1"
-$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
 
 .\scripts\deploy_azureml.ps1 `
   -ResourceGroup "YOUR-RESOURCE-GROUP" `

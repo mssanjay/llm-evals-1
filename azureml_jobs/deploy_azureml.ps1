@@ -30,7 +30,7 @@ param(
     [string]$OpenRouterSiteUrl = $env:OPENROUTER_SITE_URL,
     [string]$OpenRouterAppName = $env:OPENROUTER_APP_NAME,
     [string]$AwsRegion = $env:AWS_BEDROCK_REGION,
-    [string]$AwsBearerTokenBedrock = $env:BEDROCK_API_KEY,
+    [string]$AwsBearerTokenBedrock = $env:AWS_BEARER_TOKEN_BEDROCK,
     [string]$AwsBedrockMantleBaseUrl = $env:AWS_BEDROCK_MANTLE_BASE_URL,
     [switch]$PrepareDatasets,
     [switch]$NoSubmit
@@ -155,12 +155,12 @@ if ($Provider -eq "aws") {
         throw "Set AWS_BEDROCK_REGION, AWS_REGION, or AWS_DEFAULT_REGION, or pass -AwsRegion."
     }
     if (-not $AwsBearerTokenBedrock) {
-        throw "Set BEDROCK_API_KEY before submitting an Azure ML job that calls Bedrock Mantle."
+        throw "Set AWS_BEARER_TOKEN_BEDROCK before submitting an Azure ML job that calls Bedrock Mantle."
     }
     $lines += @(
         'environment_variables:',
         "  AWS_BEDROCK_REGION: `"$AwsRegion`"",
-        "  BEDROCK_API_KEY: `"$AwsBearerTokenBedrock`""
+        "  AWS_BEARER_TOKEN_BEDROCK: `"$AwsBearerTokenBedrock`""
     )
     if ($AwsBedrockMantleBaseUrl) {
         $lines += "  AWS_BEDROCK_MANTLE_BASE_URL: `"$AwsBedrockMantleBaseUrl`""

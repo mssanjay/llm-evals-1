@@ -27,7 +27,7 @@ Example:
 
 Experiment 1 puts the wrong-answer cue inside one story.
 
-The story pool contains 5 story templates for each cue count from `1` through `10`. The `0` cue count is the control group.
+The story pool contains 5 story templates for each cue count from `1` through `10`. Every template is 60-100 words so story length stays controlled across cue-count scenarios. The `0` cue count is the control group.
 
 We plot how often the model follows the shortcut as the cue count increases.
 

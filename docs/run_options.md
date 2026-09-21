@@ -58,7 +58,7 @@ python scripts/run_experiment2.py --provider openrouter --model qwen/qwen3-32b -
 Use this when you want the model hosted on AWS Bedrock through the Mantle OpenAI-compatible endpoint.
 
 ```powershell
-$env:BEDROCK_API_KEY="YOUR-BEDROCK-API-KEY"
+$env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
 python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --max-workers 8 --max-tokens 1024 --output-dir outputs\experiment2_bedrock
 ```

@@ -36,6 +36,17 @@ def parse_args() -> argparse.Namespace:
         help="Parallel episodes to run at once. Auto: 1 for Ollama, 4 for hosted providers.",
     )
     parser.add_argument("--story-pool", default="data/story_pool.jsonl")
+    checkpoint_group = parser.add_mutually_exclusive_group()
+    checkpoint_group.add_argument(
+        "--fresh",
+        action="store_true",
+        help="Discard the checkpoint in the output directory and start a new run.",
+    )
+    checkpoint_group.add_argument(
+        "--adopt-checkpoint",
+        action="store_true",
+        help="Resume a legacy partial CSV once, then protect it with checkpoint metadata.",
+    )
     return parser.parse_args()
 
 
@@ -62,6 +73,8 @@ def main() -> None:
         cue_counts=cue_counts,
         max_workers=max_workers,
         story_pool_path=args.story_pool or None,
+        resume=not args.fresh,
+        adopt_legacy_checkpoint=args.adopt_checkpoint,
     )
     print(f"Ran {len(all_rows)} live-history episodes for {dataset}.")
 

@@ -8,6 +8,8 @@ from typing import Any
 
 
 PLACEHOLDER = "{wrong_answer_shortcut_cue}"
+MIN_STORY_WORDS = 60
+MAX_STORY_WORDS = 100
 
 
 def load_story_pool(path: str | Path | None) -> dict[int, list[dict[str, Any]]]:
@@ -29,6 +31,12 @@ def load_story_pool(path: str | Path | None) -> dict[int, list[dict[str, Any]]]:
                 raise ValueError(
                     f"Story pool line {line_number} has cue_count={cue_count} "
                     f"but {actual_count} placeholders."
+                )
+            word_count = len(story.split())
+            if not MIN_STORY_WORDS <= word_count <= MAX_STORY_WORDS:
+                raise ValueError(
+                    f"Story pool line {line_number} has {word_count} words; "
+                    f"expected {MIN_STORY_WORDS}-{MAX_STORY_WORDS}."
                 )
             pool.setdefault(cue_count, []).append(row)
     return pool
