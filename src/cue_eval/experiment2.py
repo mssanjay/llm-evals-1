@@ -17,6 +17,12 @@ from cue_eval.story_pool import choose_story_template, load_story_pool, render_s
 
 
 TEACHING_TURNS = 4
+PROBE_RESPONSE_CATEGORIES = (
+    ("correct", "correct_count", "Correct answer", "#2ca02c"),
+    ("followed_bad_clue", "shortcut_count", "Shortcut cue taken", "#d62728"),
+    ("other_wrong_answer", "other_wrong_answer_count", "Other wrong answer", "#ff7f0e"),
+    ("parse_fail", "no_response_count", "No response", "#7f7f7f"),
+)
 
 
 def run_experiment2_experiment(
@@ -114,7 +120,7 @@ def run_experiment2_experiment(
 
 
 def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Aggregate probe shortcut count by dataset, reasoning mode, and cue count."""
+    """Aggregate every probe response by dataset, reasoning mode, and cue count."""
     summary: list[dict[str, Any]] = []
     datasets = sorted({row["dataset"] for row in rows})
     reasoning_modes = sorted({row["reasoning"] for row in rows})
@@ -129,8 +135,17 @@ def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     and row["reasoning"] == reasoning
                     and int(row["cue_count"]) == cue_count
                 ]
+                category_counts = {
+                    label: sum(row["probe_label"] == label for row in group)
+                    for label, _, _, _ in PROBE_RESPONSE_CATEGORIES
+                }
+                unknown_labels = {
+                    row["probe_label"] for row in group if row["probe_label"] not in category_counts
+                }
+                if unknown_labels:
+                    names = ", ".join(sorted(unknown_labels))
+                    raise ValueError(f"Unknown probe response labels: {names}")
                 valid = [row for row in group if row["probe_label"] != "parse_fail"]
-                shortcut = [row for row in valid if row["probe_label"] == "followed_bad_clue"]
                 held_counts = [int(row["rule_held_count"]) for row in valid]
                 summary.append(
                     {
@@ -138,8 +153,12 @@ def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         "reasoning": reasoning,
                         "cue_count": cue_count,
                         "n": len(valid),
-                        "shortcut_count": len(shortcut),
-                        "shortcut_rate": len(shortcut) / len(valid) if valid else 0.0,
+                        "total_n": len(group),
+                        "correct_count": category_counts["correct"],
+                        "shortcut_count": category_counts["followed_bad_clue"],
+                        "other_wrong_answer_count": category_counts["other_wrong_answer"],
+                        "no_response_count": category_counts["parse_fail"],
+                        "shortcut_rate": category_counts["followed_bad_clue"] / len(valid) if valid else 0.0,
                         "avg_rule_held_count": sum(held_counts) / len(held_counts) if held_counts else 0.0,
                     }
                 )
@@ -154,6 +173,7 @@ def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]
     _write_csv(output_path / "experiment2_summary.csv", summary)
     _write_cue_count_plot(output_path / "experiment2_shortcut_count_by_cue_count.png", summary, use_rate=False)
     _write_cue_count_plot(output_path / "experiment2_shortcut_rate.png", summary, use_rate=True)
+    _write_response_category_plot(output_path / "experiment2_response_categories_stacked.png", summary)
     return summary
 
 
@@ -539,5 +559,67 @@ def _write_cue_count_plot(path: Path, summary: list[dict[str, Any]], use_rate: b
     )
     plt.ylim(-5 if use_rate else 0, max(110 if use_rate else 10, max_y + (10 if use_rate else 5)))
     plt.tight_layout()
+    plt.savefig(path, dpi=160)
+    plt.close()
+
+
+def _write_response_category_plot(path: Path, summary: list[dict[str, Any]]) -> None:
+    """Plot all final probe response categories as stacked counts."""
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("Install matplotlib to create the response-category chart.")
+        return
+
+    dataset = "math500"
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.2), sharey=True)
+    max_total = max((int(row["total_n"]) for row in summary), default=0)
+
+    for ax, reasoning in zip(axes, ["off", "on"]):
+        points = [
+            row
+            for row in summary
+            if row["dataset"] == dataset and row["reasoning"] == reasoning
+        ]
+        x_values = [int(row["cue_count"]) for row in points]
+        bottoms = [0] * len(points)
+
+        for _, count_key, display_name, color in PROBE_RESPONSE_CATEGORIES:
+            values = [int(row[count_key]) for row in points]
+            bars = ax.bar(
+                x_values,
+                values,
+                bottom=bottoms,
+                width=0.72,
+                label=display_name,
+                color=color,
+            )
+            for bar, value, bottom in zip(bars, values, bottoms):
+                if value:
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        bottom + value / 2,
+                        str(value),
+                        ha="center",
+                        va="center",
+                        fontsize=7,
+                        color="white" if color in {"#2ca02c", "#d62728", "#7f7f7f"} else "black",
+                    )
+            bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
+
+        for x_value, total in zip(x_values, bottoms):
+            ax.text(x_value, total + 0.6, f"n={total}", ha="center", va="bottom", fontsize=7)
+        ax.set_title(f"reasoning = {reasoning}")
+        ax.set_xlabel("no. of times cue appears in each story")
+        ax.set_xticks(x_values)
+        ax.set_ylim(0, max_total + 4)
+        ax.set_axisbelow(True)
+        ax.grid(axis="y", alpha=0.25)
+
+    axes[0].set_ylabel("number of final probe responses")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 0.93), fontsize=8)
+    fig.suptitle("Math500 final probe responses by wrong-answer cue count", fontsize=11)
+    plt.tight_layout(rect=(0, 0, 1, 0.86))
     plt.savefig(path, dpi=160)
     plt.close()

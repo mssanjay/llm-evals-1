@@ -160,6 +160,7 @@ This writes:
 - `outputs\experiment2_dryrun\experiment2_summary.csv`
 - `outputs\experiment2_dryrun\experiment2_shortcut_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
+- `outputs\experiment2_dryrun\experiment2_response_categories_stacked.png`
 - `outputs\experiment2_dryrun\progress.log`
 
 `full_results.csv` is the coach-friendly condition summary. Its first columns are:
@@ -182,6 +183,11 @@ The row-level CSV includes these labels:
 - `probe_label`
 - `probe_took_shortcut`
 - `probe_is_correct`
+
+The stacked response-category chart counts every probe as `Correct answer`,
+`Shortcut cue taken`, `Other wrong answer`, or `No response`. `No response`
+corresponds to a `parse_fail` label. Each stacked bar therefore totals the full
+number of episodes for that reasoning mode and cue count.
 
 For slow local model runs, watch progress in another PowerShell window:
 

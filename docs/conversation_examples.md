@@ -1,12 +1,12 @@
-# Demo Conversation Examples
+# Conversation Examples
 
 These are three full Experiment 2 conversations from the Bedrock run.
 Each example includes both reasoning settings and all five model requests.
 
 Machine-readable files:
 
-- `data/demo_conversation_examples.json`
-- `data/demo_conversation_examples.jsonl`
+- `data/conversation_examples.json`
+- `data/conversation_examples.jsonl`
 
 Each turn shows:
 
