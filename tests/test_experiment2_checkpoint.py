@@ -18,7 +18,7 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
     """Keep successful episodes and retry only the failed checkpoint key."""
     source_lines = (ROOT / "data" / "math500_prepared_50.jsonl").read_text(encoding="utf-8").splitlines()
     data_path = tmp_path / "examples.jsonl"
-    data_path.write_text("\n".join(source_lines[:6]) + "\n", encoding="utf-8")
+    data_path.write_text("\n".join(source_lines[:5]) + "\n", encoding="utf-8")
     output_dir = tmp_path / "output"
     original_run_episode = experiment2._run_episode
 
@@ -44,13 +44,19 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
     assert len(rows) == 2
     assert (output_dir / "experiment2_checkpoint.json").exists()
     assert (output_dir / "experiment2_results.partial.csv").exists()
+    assert (output_dir / "experiment2_results.partial.csv").read_bytes().startswith(b"\xef\xbb\xbf")
+    assert rows[0]["probe_finish_reason"] == "stop"
+    assert rows[0]["probe_was_truncated"] is False
+    assert [row["cue_strategy"] for row in rows] == ["plus_one", "times_ten"]
+    assert "teaching_label_3" in rows[0]
+    assert "teaching_label_4" not in rows[0]
 
 
 def test_resume_rejects_changed_configuration(tmp_path: Path) -> None:
     """Adopt legacy rows once, then reject changed model settings."""
     source_lines = (ROOT / "data" / "math500_prepared_50.jsonl").read_text(encoding="utf-8").splitlines()
     data_path = tmp_path / "examples.jsonl"
-    data_path.write_text("\n".join(source_lines[:5]) + "\n", encoding="utf-8")
+    data_path.write_text("\n".join(source_lines[:4]) + "\n", encoding="utf-8")
     output_dir = tmp_path / "output"
     _run(data_path, output_dir, resume=False)
     (output_dir / "experiment2_checkpoint.json").unlink()

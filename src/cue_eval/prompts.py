@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from cue_eval.reasoning import add_qwen_thinking_switch
 from cue_eval.story_pool import render_story
 
 
@@ -12,9 +13,10 @@ def build_messages(
     cue_count: int,
     story_template: str | None = None,
     reasoning: str = "off",
+    model: str = "",
 ) -> list[dict[str, str]]:
     """Create one conversation for a single example and cue strength."""
-    messages = [{"role": "system", "content": _system_prompt(reasoning)}]
+    messages = [{"role": "system", "content": _system_prompt(reasoning, model)}]
     if cue_count > 0:
         if story_template:
             messages.append(_story_problem_turn(example, story_template))
@@ -24,12 +26,14 @@ def build_messages(
     return messages
 
 
-def _system_prompt(reasoning: str) -> str:
+def _system_prompt(reasoning: str, model: str = "") -> str:
     """Create the reasoning-on/off system instruction."""
     base = "You are a careful math tutor. Always end with 'Final answer: <number>'."
     if reasoning == "on":
-        return base + " Think step by step before giving the final answer."
-    return base + " Keep the response brief and do not show step-by-step reasoning."
+        prompt = base + " Think step by step before giving the final answer."
+    else:
+        prompt = base + " Keep the response brief and do not show step-by-step reasoning."
+    return add_qwen_thinking_switch(prompt, model, reasoning)
 
 
 def _story_problem_turn(example: dict[str, Any], story_template: str) -> dict[str, str]:

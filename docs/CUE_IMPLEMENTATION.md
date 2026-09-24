@@ -35,13 +35,19 @@ We plot how often the model follows the shortcut as the cue count increases.
 
 Experiment 2 uses a live conversation history.
 
+It creates 45 episodes and assigns exactly one wrong-answer strategy to each
+episode: correct answer + 1, correct answer x 10, or a deterministic random
+number. The strategies rotate evenly, so each is used in 15 episodes. The same
+strategy applies to all turns in its episode.
+
 For each episode:
 
 1. Pick a cue count from `1` through `10`.
-2. Ask 4 teaching turns using stories with that many cue mentions.
-3. Save the assistant answer for each teaching turn.
-4. Ask one final probe in the same conversation, using the same cue count.
-5. Label whether the probe answer followed the shortcut.
+2. Assign the episode's wrong-answer strategy.
+3. Ask 3 teaching turns using stories with that many cue mentions.
+4. Save the assistant answer for each teaching turn.
+5. Ask one final probe in the same conversation, using the same cue count and strategy.
+6. Label whether the probe answer followed the shortcut.
 
 The graph has two panels:
 

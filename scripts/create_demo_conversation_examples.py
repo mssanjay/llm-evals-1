@@ -17,6 +17,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from cue_eval.experiment2 import TEACHING_TURNS
 from cue_eval.scoring import extract_final_number
 
 
@@ -48,7 +49,7 @@ SELECTED_EPISODES = [
 def load_results() -> list[dict[str, str]]:
     """Read row-level experiment results."""
 
-    with RESULTS_CSV.open(newline="", encoding="utf-8") as csv_file:
+    with RESULTS_CSV.open(newline="", encoding="utf-8-sig") as csv_file:
         return list(csv.DictReader(csv_file))
 
 
@@ -98,12 +99,8 @@ def find_prompt_sequence(
         and int(entry["episode_index"]) == episode_index
     ]
     expected_turns = [
-        ("teaching", 1),
-        ("teaching", 2),
-        ("teaching", 3),
-        ("teaching", 4),
-        ("probe", 0),
-    ]
+        ("teaching", index) for index in range(1, TEACHING_TURNS + 1)
+    ] + [("probe", 0)]
     candidates: list[list[dict[str, Any]]] = []
     for start in range(len(episode_entries) - len(expected_turns) + 1):
         candidate = episode_entries[start : start + len(expected_turns)]
@@ -125,7 +122,9 @@ def _sequence_matches_result(
     entries: list[dict[str, Any]], row: dict[str, str]
 ) -> bool:
     """Check prompt text, chat history, and parsed teaching answers."""
-    expected_prompts = [row[f"teaching_prompt_{index}"] for index in range(1, 5)]
+    expected_prompts = [
+        row[f"teaching_prompt_{index}"] for index in range(1, TEACHING_TURNS + 1)
+    ]
     expected_prompts.append(row["probe_prompt"])
     for entry, expected_prompt in zip(entries, expected_prompts):
         messages = entry.get("messages", [])
@@ -135,7 +134,7 @@ def _sequence_matches_result(
     try:
         responses = [
             response_from_next_request(entries[index], entries[index + 1])
-            for index in range(4)
+            for index in range(TEACHING_TURNS)
         ]
     except ValueError:
         return False
@@ -178,7 +177,7 @@ def response_from_next_request(
 def build_mode_example(
     row: dict[str, str], prompt_entries: list[dict[str, Any]]
 ) -> dict[str, Any]:
-    """Build all five requests and responses for one reasoning mode."""
+    """Build every teaching request and the probe for one reasoning mode."""
 
     reasoning = row["reasoning"]
     cue_count = int(row["cue_count"])
@@ -186,11 +185,15 @@ def build_mode_example(
 
     entries = find_prompt_sequence(prompt_entries, row)
 
-    teaching_labels = [row[f"teaching_label_{index}"] for index in range(1, 5)]
-    teaching_answers = [row[f"teaching_answer_{index}"] for index in range(1, 5)]
+    teaching_labels = [
+        row[f"teaching_label_{index}"] for index in range(1, TEACHING_TURNS + 1)
+    ]
+    teaching_answers = [
+        row[f"teaching_answer_{index}"] for index in range(1, TEACHING_TURNS + 1)
+    ]
 
     turns: list[dict[str, Any]] = []
-    for index in range(4):
+    for index in range(TEACHING_TURNS):
         turns.append(
             {
                 "turn": index + 1,
@@ -207,7 +210,7 @@ def build_mode_example(
 
     turns.append(
         {
-            "turn": 5,
+            "turn": TEACHING_TURNS + 1,
             "turn_type": "probe",
             "example_id": entries[-1]["example_id"],
             "model_input": {"messages": entries[-1]["messages"]},
@@ -227,6 +230,7 @@ def build_mode_example(
         "model": entries[0]["model"],
         "dataset": row["dataset"],
         "cue_count": cue_count,
+        "cue_strategy": row.get("cue_strategy", ""),
         "episode_index": episode_index,
         "probe_id": row["probe_id"],
         "summary": {
@@ -335,7 +339,7 @@ def write_markdown(examples: list[dict[str, Any]]) -> None:
         "# Demo Conversation Examples",
         "",
         "These are three full Experiment 2 conversations from the Bedrock run.",
-        "Each example includes both reasoning settings and all five model requests.",
+        "Each example includes both reasoning settings and all four model requests.",
         "",
         "Machine-readable files:",
         "",
@@ -356,6 +360,7 @@ def write_markdown(examples: list[dict[str, Any]]) -> None:
                 f"## {example['id']}",
                 "",
                 f"- Cue count: {example['cue_count']}",
+                f"- Cue strategy: `{next(iter(example['reasoning_modes'].values()))['cue_strategy']}`",
                 f"- Probe ID: `{example['probe_id']}`",
                 "",
                 "| Reasoning | Probe Label | Probe Answer | Correct Answer | Shortcut Answer | Took Shortcut |",
@@ -378,7 +383,7 @@ def write_markdown(examples: list[dict[str, Any]]) -> None:
                     "",
                     f"- Provider/model: `{mode['provider']}` / `{mode['model']}`",
                     f"- Episode index: `{mode['episode_index']}`",
-                    f"- Teaching rule held count: {mode['summary']['rule_held_count']} of 4",
+                    f"- Teaching rule held count: {mode['summary']['rule_held_count']} of {TEACHING_TURNS}",
                     "",
                 ]
             )

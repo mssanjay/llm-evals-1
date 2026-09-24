@@ -7,7 +7,24 @@ import os
 import re
 import urllib.error
 import urllib.request
+from dataclasses import dataclass
 from typing import Any
+
+
+@dataclass(frozen=True)
+class ModelResponse:
+    """Store model text and completion metadata used by the evaluator."""
+
+    content: str
+    finish_reason: str | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+
+    @property
+    def was_truncated(self) -> bool:
+        """Return whether the provider stopped at the output-token limit."""
+        return (self.finish_reason or "").lower() in {"length", "max_tokens"}
 
 
 def call_model(
@@ -15,13 +32,24 @@ def call_model(
     messages: list[dict[str, str]],
     model: str,
     temperature: float,
-    max_tokens: int = 256,
+    max_tokens: int = 1024,
 ) -> str:
-    """Route a chat request to the selected provider."""
+    """Route a chat request and return only its assistant text."""
+    return call_model_result(provider, messages, model, temperature, max_tokens).content
+
+
+def call_model_result(
+    provider: str,
+    messages: list[dict[str, str]],
+    model: str,
+    temperature: float,
+    max_tokens: int = 1024,
+) -> ModelResponse:
+    """Route a chat request and preserve completion metadata."""
     if provider == "dryrun":
         raise ValueError("dryrun is handled by the experiment runner, not the model provider.")
     if provider == "mock":
-        return _mock_response(messages)
+        return ModelResponse(content=_mock_response(messages), finish_reason="stop")
     if provider == "ollama":
         return _call_ollama(messages, model=model, temperature=temperature, max_tokens=max_tokens)
     if provider == "openrouter":
@@ -53,7 +81,9 @@ def _mock_response(messages: list[dict[str, str]]) -> str:
     return f"I solved it directly. Final answer: {solved_answer}"
 
 
-def _call_ollama(messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int) -> str:
+def _call_ollama(
+    messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
+) -> ModelResponse:
     """Call a locally running Ollama chat server."""
     endpoint = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/") + "/api/chat"
     payload = {
@@ -63,10 +93,25 @@ def _call_ollama(messages: list[dict[str, str]], model: str, temperature: float,
         "options": {"temperature": temperature, "num_predict": max_tokens},
     }
     data = _post_json(endpoint, payload, headers={"Content-Type": "application/json"})
-    return data["message"]["content"]
+    prompt_tokens = _optional_int(data.get("prompt_eval_count"))
+    completion_tokens = _optional_int(data.get("eval_count"))
+    total_tokens = (
+        prompt_tokens + completion_tokens
+        if prompt_tokens is not None and completion_tokens is not None
+        else None
+    )
+    return ModelResponse(
+        content=data["message"]["content"],
+        finish_reason=data.get("done_reason"),
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=total_tokens,
+    )
 
 
-def _call_openrouter(messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int) -> str:
+def _call_openrouter(
+    messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
+) -> ModelResponse:
     """Call OpenRouter's OpenAI-compatible chat-completions endpoint."""
     api_key = _required_env("OPENROUTER_API_KEY")
     endpoint = _openrouter_chat_url(
@@ -89,10 +134,12 @@ def _call_openrouter(messages: list[dict[str, str]], model: str, temperature: fl
     if app_name:
         headers["X-OpenRouter-Title"] = app_name
     data = _post_json(endpoint, payload, headers=headers)
-    return _chat_message_content(data, "OpenRouter")
+    return _chat_completion_result(data, "OpenRouter")
 
 
-def _call_bedrock(messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int) -> str:
+def _call_bedrock(
+    messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
+) -> ModelResponse:
     """Call the Bedrock Mantle OpenAI-compatible chat-completions endpoint."""
     api_key = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
     if not api_key:
@@ -113,12 +160,12 @@ def _call_bedrock(messages: list[dict[str, str]], model: str, temperature: float
         "Authorization": f"Bearer {api_key}",
     }
     data = _post_json(endpoint, payload, headers=headers)
-    return _chat_message_content(data, "Bedrock Mantle")
+    return _chat_completion_result(data, "Bedrock Mantle")
 
 
 def _call_azure_openai(
     messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
-) -> str:
+) -> ModelResponse:
     """Call an Azure OpenAI compatible chat-completions deployment."""
     endpoint = _required_env("AZURE_OPENAI_ENDPOINT").rstrip("/")
     api_key = _required_env("AZURE_OPENAI_API_KEY")
@@ -128,12 +175,12 @@ def _call_azure_openai(
     payload = {"messages": messages, "temperature": temperature, "max_tokens": max_tokens}
     headers = {"Content-Type": "application/json", "api-key": api_key}
     data = _post_json(url, payload, headers=headers)
-    return _chat_message_content(data, "Azure OpenAI")
+    return _chat_completion_result(data, "Azure OpenAI")
 
 
 def _call_azure_foundry(
     messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
-) -> str:
+) -> ModelResponse:
     """Call a Microsoft Foundry deployment through the OpenAI-compatible route."""
     endpoint = os.getenv("AZURE_FOUNDRY_ENDPOINT") or _required_env("AZURE_AI_ENDPOINT")
     api_key = os.getenv("AZURE_FOUNDRY_API_KEY") or _required_env("AZURE_AI_API_KEY")
@@ -150,12 +197,12 @@ def _call_azure_foundry(
                 f"Check that --model exactly matches the deployment name in Foundry: {model_name!r}."
             ) from error
         raise
-    return _chat_message_content(data, "Foundry")
+    return _chat_completion_result(data, "Foundry")
 
 
 def _call_azure_ai_inference(
     messages: list[dict[str, str]], model: str, temperature: float, max_tokens: int
-) -> str:
+) -> ModelResponse:
     """Call the Azure AI Model Inference chat-completions endpoint."""
     endpoint = _required_env("AZURE_AI_ENDPOINT").rstrip("/")
     api_key = _required_env("AZURE_AI_API_KEY")
@@ -178,7 +225,7 @@ def _call_azure_ai_inference(
                 "Azure AI Model Inference endpoint, not an Azure OpenAI resource."
             ) from error
         raise
-    return _chat_message_content(data, "Azure AI")
+    return _chat_completion_result(data, "Azure AI")
 
 
 def _azure_ai_model_name(model: str) -> str:
@@ -230,24 +277,58 @@ def _foundry_chat_url(endpoint: str) -> str:
 
 def _chat_message_content(data: dict[str, Any], provider_name: str) -> str:
     """Extract assistant text from OpenAI-compatible responses."""
+    return _chat_completion_result(data, provider_name).content
+
+
+def _chat_completion_result(data: dict[str, Any], provider_name: str) -> ModelResponse:
+    """Extract assistant text, stop reason, and token counts."""
     try:
-        message = data["choices"][0]["message"]
+        choice = data["choices"][0]
+        message = choice["message"]
     except (KeyError, IndexError, TypeError) as error:
         raise RuntimeError(f"{provider_name} returned an unexpected response shape: {data}") from error
 
     content = message.get("content")
     if isinstance(content, str):
-        return content
-    if isinstance(content, list):
+        text = content
+    elif isinstance(content, list):
         parts = [
             part.get("text", "")
             for part in content
             if isinstance(part, dict) and part.get("type") in {None, "text"}
         ]
-        return "\n".join(part for part in parts if part)
-    if content is None:
-        return ""
-    return str(content)
+        text = "\n".join(part for part in parts if part)
+    elif content is None:
+        text = ""
+    else:
+        text = str(content)
+
+    usage = data.get("usage") or {}
+    prompt_tokens = _optional_int(usage.get("prompt_tokens", usage.get("input_tokens")))
+    completion_tokens = _optional_int(
+        usage.get("completion_tokens", usage.get("output_tokens"))
+    )
+    total_tokens = _optional_int(usage.get("total_tokens"))
+    if total_tokens is None and prompt_tokens is not None and completion_tokens is not None:
+        total_tokens = prompt_tokens + completion_tokens
+
+    return ModelResponse(
+        content=text,
+        finish_reason=choice.get("finish_reason"),
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=total_tokens,
+    )
+
+
+def _optional_int(value: Any) -> int | None:
+    """Convert a provider token count when one is present."""
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _post_json(url: str, payload: dict[str, Any], headers: dict[str, str]) -> dict[str, Any]:

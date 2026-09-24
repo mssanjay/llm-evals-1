@@ -18,8 +18,8 @@ MATH500 dataset
   -> score whether model took shortcut
   -> make CSV + plot
 
-46 episodes x 10 cue counts x 2 reasoning modes = 920 result rows
-920 x 5 model calls = 4,600 model calls
+45 episodes x 10 cue counts x 2 reasoning modes = 900 result rows
+900 x 4 model calls = 3,600 model calls
 
 ## Quick Local Test
 
@@ -131,13 +131,19 @@ Experiment 2 is the live-history version of the story-cue experiment.
 For each episode:
 
 1. Choose a cue count from `1` through `10`.
-2. Run 4 teaching turns in the same conversation history, using stories with that many cue mentions.
-3. Score each teaching answer as `correct`, `followed_bad_clue`, or `other_wrong_answer`.
-4. Ask one probe problem in that same conversation, also using a story with that many cue mentions.
-5. Count whether the probe answer copied the wrong-answer cue.
-6. Plot shortcut count against cue count.
+2. Assign one wrong-answer strategy to the episode: correct answer + 1, correct answer x 10, or a deterministic random number. Each strategy is used for 15 of the 45 episodes.
+3. Run 3 teaching turns in the same conversation history, using stories with that many cue mentions and the episode's assigned strategy.
+4. Score each teaching answer as `correct`, `followed_bad_clue`, or `other_wrong_answer`.
+5. Ask one probe problem in that same conversation, using the same strategy.
+6. Count whether the probe answer copied the wrong-answer cue.
+7. Plot shortcut count against cue count.
 
-Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_4` and `probe_prompt` so the full conversation can be inspected.
+Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_3` and `probe_prompt` so the full conversation can be inspected.
+
+For Qwen3 models, the reasoning conditions also send Qwen's explicit `/no_think`
+and `/think` switches. The default output limit is 1024 tokens. A response that
+hits the token limit or omits the required `Final answer:` marker is labeled
+`parse_fail` instead of being scored from an incidental number in its explanation.
 
 Run it without calling a model:
 
@@ -147,6 +153,7 @@ python scripts/run_experiment2.py `
   --model qwen.qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
+  --episodes 45 `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --output-dir outputs\experiment2_dryrun
 ```
@@ -163,6 +170,7 @@ This writes:
 - `outputs\experiment2_dryrun\experiment2_shortcut_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
 - `outputs\experiment2_dryrun\experiment2_response_categories_stacked.png`
+- `outputs\experiment2_dryrun\experiment2_story_token_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\progress.log`
 
 `full_results.csv` is the coach-friendly condition summary. Its first columns are:
@@ -180,16 +188,29 @@ The row-level CSV includes these labels:
 
 - `reasoning`: `off` or `on`
 - `cue_count`: how many times `{wrong_answer_shortcut_cue}` appears in each story
-- `teaching_label_1` through `teaching_label_4`
+- `cue_strategy`: `plus_one`, `times_ten`, or `random`; one strategy is used throughout each episode
+- `teaching_label_1` through `teaching_label_3`
+- `teaching_shortcut_answer_1` through `teaching_shortcut_answer_3`
 - `rule_held_count`
 - `probe_label`
 - `probe_took_shortcut`
 - `probe_is_correct`
+- `probe_finish_reason` and `probe_was_truncated`
+- `probe_prompt_tokens`, `probe_completion_tokens`, and `probe_total_tokens`
+- matching completion metadata for each of the three teaching turns
+
+CSV artifacts are written as UTF-8 with a byte-order mark so Excel detects curly
+quotes and other non-ASCII text correctly.
 
 The stacked response-category chart counts every probe as `Correct answer`,
-`Shortcut cue taken`, `Other wrong answer`, or `No response`. `No response`
-corresponds to a `parse_fail` label. Each stacked bar therefore totals the full
-number of episodes for that reasoning mode and cue count.
+`Shortcut cue taken`, `Other wrong answer`, or `Invalid / truncated`. The last
+category corresponds to a `parse_fail` label. Each stacked bar therefore totals
+the full number of episodes for that reasoning mode and cue count.
+
+Every Experiment 2 chart captions the 60–100-word template constraint. The
+story-token diagnostic plots the rendered story text saved in the prompts against
+cue count, using model-independent lexical tokens, so a systematic length trend is
+visible without depending on one provider's tokenizer.
 
 For slow local model runs, watch progress in another PowerShell window:
 

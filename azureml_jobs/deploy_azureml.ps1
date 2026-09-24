@@ -16,8 +16,9 @@ param(
 
     [string]$Model = "qwen3-32b",
     [string]$CueCounts = "",
+    [int]$Episodes = 45,
     [int]$MaxWorkers = 4,
-    [int]$MaxTokens = 256,
+    [int]$MaxTokens = 1024,
     [double]$Temperature = 0.2,
     [string]$AzureAiEndpoint = $env:AZURE_AI_ENDPOINT,
     [string]$AzureAiApiKey = $env:AZURE_AI_API_KEY,
@@ -93,8 +94,8 @@ if (-not $CueCounts) {
     $CueCounts = $defaultCueCounts
 }
 
-$workerFlag = if ($Experiment -eq 2) { "--max-workers $MaxWorkers" } else { "" }
-$command = "python $runner --provider $Provider $prepareFlag --cue-counts $CueCounts $workerFlag --max-tokens $MaxTokens --temperature $Temperature --output-dir outputs/$outputName"
+$experiment2Flags = if ($Experiment -eq 2) { "--episodes $Episodes --max-workers $MaxWorkers" } else { "" }
+$command = "python $runner --provider $Provider $prepareFlag --cue-counts $CueCounts $experiment2Flags --max-tokens $MaxTokens --temperature $Temperature --output-dir outputs/$outputName"
 if ($Provider -notin @("dryrun", "mock")) {
     $command = "$command --model $Model"
 }

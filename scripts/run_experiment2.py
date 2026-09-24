@@ -26,9 +26,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prepared-dir", default="data")
     parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
     parser.add_argument("--temperature", type=float, default=0.2)
-    parser.add_argument("--max-tokens", type=int, default=256)
+    parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--reasoning-modes", default="off,on")
     parser.add_argument("--cue-counts", default="1,2,3,4,5,6,7,8,9,10")
+    parser.add_argument(
+        "--episodes",
+        type=int,
+        default=45,
+        help="Number of 3-teaching-turn-plus-probe episodes per condition.",
+    )
     parser.add_argument(
         "--max-workers",
         type=int,
@@ -71,6 +77,7 @@ def main() -> None:
         max_tokens=args.max_tokens,
         reasoning_modes=reasoning_modes,
         cue_counts=cue_counts,
+        episode_limit=args.episodes,
         max_workers=max_workers,
         story_pool_path=args.story_pool or None,
         resume=not args.fresh,
@@ -93,7 +100,7 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     """Write combined row-level results."""
     if not rows:
         return
-    with path.open("w", newline="", encoding="utf-8") as file:
+    with path.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)

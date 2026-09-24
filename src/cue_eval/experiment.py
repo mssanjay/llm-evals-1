@@ -8,7 +8,7 @@ from typing import Any
 
 from cue_eval.data import load_examples
 from cue_eval.prompts import build_messages
-from cue_eval.providers import call_model
+from cue_eval.providers import ModelResponse, call_model_result
 from cue_eval.scoring import extract_final_number, label_answer, summarize
 from cue_eval.story_pool import choose_story_template, load_story_pool
 
@@ -20,7 +20,7 @@ def run_experiment(
     model: str,
     cue_counts: list[int],
     temperature: float,
-    max_tokens: int = 256,
+    max_tokens: int = 1024,
     story_pool_path: str | Path | None = None,
     reasoning: str = "off",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -34,15 +34,31 @@ def run_experiment(
     for example_index, example in enumerate(examples):
         for cue_count in cue_counts:
             story_template = choose_story_template(story_pool, cue_count, example_index)
-            messages = build_messages(example, cue_count, story_template, reasoning=reasoning)
-            response = _demo_response(example, cue_count) if provider in {"dryrun", "mock"} else call_model(
-                provider,
-                messages,
+            messages = build_messages(
+                example,
+                cue_count,
+                story_template,
+                reasoning=reasoning,
                 model=model,
-                temperature=temperature,
-                max_tokens=max_tokens,
             )
-            parsed_answer = extract_final_number(response)
+            if provider in {"dryrun", "mock"}:
+                result = ModelResponse(
+                    content=_demo_response(example, cue_count),
+                    finish_reason="stop",
+                )
+            else:
+                result = call_model_result(
+                    provider,
+                    messages,
+                    model=model,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            parsed_answer = extract_final_number(
+                result.content,
+                require_final=True,
+                finish_reason=result.finish_reason,
+            )
             label = label_answer(parsed_answer, example["correct_answer"], example["shortcut_answer"])
             rows.append(
                 {
@@ -53,7 +69,12 @@ def run_experiment(
                     "shortcut_answer": example["shortcut_answer"],
                     "parsed_answer": "" if parsed_answer is None else parsed_answer,
                     "label": label,
-                    "response": response,
+                    "finish_reason": result.finish_reason or "",
+                    "response_was_truncated": result.was_truncated,
+                    "prompt_tokens": _csv_value(result.prompt_tokens),
+                    "completion_tokens": _csv_value(result.completion_tokens),
+                    "total_tokens": _csv_value(result.total_tokens),
+                    "response": result.content,
                     "prompt": _messages_to_text(messages),
                     "story_template": story_template or "",
                 }
@@ -78,11 +99,16 @@ def _messages_to_text(messages: list[dict[str, str]]) -> str:
     return "\n\n".join(f"{message['role'].upper()}: {message['content']}" for message in messages)
 
 
+def _csv_value(value: int | None) -> int | str:
+    """Represent missing provider metadata as an empty CSV cell."""
+    return "" if value is None else value
+
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     """Write dictionaries to CSV for simple inspection in Excel or notebooks."""
     if not rows:
         return
-    with path.open("w", newline="", encoding="utf-8") as file:
+    with path.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)

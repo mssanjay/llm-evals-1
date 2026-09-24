@@ -11,13 +11,22 @@ NUMBER_PATTERN = re.compile(r"-?\d+(?:,\d{3})*(?:\.\d+)?")
 FINAL_PATTERN = re.compile(r"final answer\s*:\s*(-?\d+(?:,\d{3})*(?:\.\d+)?)", re.IGNORECASE)
 
 
-def extract_final_number(text: str | None) -> float | None:
-    """Find the model's final numeric answer, preferring the requested format."""
+def extract_final_number(
+    text: str | None,
+    *,
+    require_final: bool = False,
+    finish_reason: str | None = None,
+) -> float | None:
+    """Find the numeric answer while optionally enforcing the response contract."""
     if not text:
+        return None
+    if (finish_reason or "").lower() in {"length", "max_tokens"}:
         return None
     final_match = FINAL_PATTERN.search(text)
     if final_match:
         return _to_float(final_match.group(1))
+    if require_final:
+        return None
 
     matches = NUMBER_PATTERN.findall(text)
     if not matches:

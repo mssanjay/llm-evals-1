@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prepared-dir", default="data", help="Directory with math500_prepared_50.jsonl.")
     parser.add_argument("--cue-counts", default="0,1,2,3,4,5,6,7,8,9,10")
     parser.add_argument("--temperature", type=float, default=0.2)
-    parser.add_argument("--max-tokens", type=int, default=256)
+    parser.add_argument("--max-tokens", type=int, default=1024)
     parser.add_argument("--story-pool", default="data/story_pool.jsonl")
     return parser.parse_args()
 
@@ -91,7 +91,7 @@ def _write_summary(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
     fieldnames = ["dataset"] + [key for key in rows[0] if key != "dataset"]
-    with path.open("w", newline="", encoding="utf-8") as file:
+    with path.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
@@ -123,7 +123,7 @@ def _write_full_results(path: Path, rows: list[dict[str, Any]], model: str, prov
         )
     if not full_rows:
         return
-    with path.open("w", newline="", encoding="utf-8") as file:
+    with path.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=list(full_rows[0].keys()))
         writer.writeheader()
         writer.writerows(full_rows)

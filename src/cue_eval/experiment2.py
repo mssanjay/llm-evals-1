@@ -5,25 +5,33 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from threading import Lock
 from typing import Any
 
+from cue_eval.cue_strategies import CUE_STRATEGIES, apply_cue_strategy, strategy_for_episode
 from cue_eval.data import load_examples
-from cue_eval.providers import call_model
+from cue_eval.providers import ModelResponse, call_model_result
+from cue_eval.reasoning import add_qwen_thinking_switch
 from cue_eval.scoring import extract_final_number, label_answer
 from cue_eval.story_pool import choose_story_template, load_story_pool, render_story
 
 
-TEACHING_TURNS = 4
-CHECKPOINT_VERSION = 1
+TEACHING_TURNS = 3
+DEFAULT_EPISODES = 45
+CHECKPOINT_VERSION = 3
+STORY_LENGTH_CAPTION = (
+    "Story templates are constrained to 60\u2013100 words before cue substitution."
+)
+LEXICAL_TOKEN_PATTERN = re.compile(r"\w+|[^\w\s]", re.UNICODE)
 PROBE_RESPONSE_CATEGORIES = (
     ("correct", "correct_count", "Correct answer", "#2ca02c"),
     ("followed_bad_clue", "shortcut_count", "Shortcut cue taken", "#d62728"),
     ("other_wrong_answer", "other_wrong_answer_count", "Other wrong answer", "#ff7f0e"),
-    ("parse_fail", "no_response_count", "No response", "#7f7f7f"),
+    ("parse_fail", "no_response_count", "Invalid / truncated", "#7f7f7f"),
 )
 
 
@@ -38,6 +46,7 @@ def _checkpoint_config(
     reasoning_modes: list[str],
     cue_counts: list[int],
     episode_count: int,
+    episode_limit: int | None,
 ) -> dict[str, Any]:
     """Capture settings that must match before checkpoint rows can be reused."""
     return {
@@ -52,7 +61,9 @@ def _checkpoint_config(
         "reasoning_modes": reasoning_modes,
         "cue_counts": cue_counts,
         "episode_count": episode_count,
+        "episode_limit": episode_limit,
         "teaching_turns": TEACHING_TURNS,
+        "cue_strategies": list(CUE_STRATEGIES),
     }
 
 
@@ -114,7 +125,7 @@ def _load_partial_rows(
     """Load valid checkpoint rows and repair a truncated final CSV record."""
     rows_by_key: dict[tuple[str, str, int, int], dict[str, Any]] = {}
     discarded_rows = 0
-    with path.open("r", newline="", encoding="utf-8") as file:
+    with path.open("r", newline="", encoding="utf-8-sig") as file:
         for row in csv.DictReader(file):
             if None in row or any(value is None for value in row.values()):
                 discarded_rows += 1
@@ -162,6 +173,7 @@ def run_experiment2_experiment(
     max_tokens: int,
     reasoning_modes: list[str],
     cue_counts: list[int] | None = None,
+    episode_limit: int | None = DEFAULT_EPISODES,
     max_workers: int = 4,
     story_pool_path: str | Path | None = None,
     resume: bool = True,
@@ -171,7 +183,7 @@ def run_experiment2_experiment(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     examples = load_examples(data_path)
-    episodes = _make_episodes(examples)
+    episodes = _make_episodes(examples, episode_limit)
     story_pool = load_story_pool(story_pool_path)
     cue_counts = cue_counts or list(range(1, 11))
     max_workers = max(1, max_workers)
@@ -192,6 +204,7 @@ def run_experiment2_experiment(
         reasoning_modes=reasoning_modes,
         cue_counts=cue_counts,
         episode_count=len(episodes),
+        episode_limit=episode_limit,
     )
     expected_tasks = {
         (dataset_name, reasoning, cue_count, episode_index): episode[TEACHING_TURNS]["id"]
@@ -219,6 +232,7 @@ def run_experiment2_experiment(
         (
             f"{'Resuming' if rows else 'Starting'} live-history run provider={provider} model={model} "
             f"examples={len(examples)} episodes_per_reasoning={len(episodes)} "
+            f"cue_strategies={','.join(CUE_STRATEGIES)} "
             f"reasoning_modes={','.join(reasoning_modes)} "
             f"cue_counts={','.join(str(value) for value in cue_counts)} "
             f"max_workers={max_workers} completed={len(rows)} remaining={total_tasks - len(rows)}"
@@ -349,7 +363,7 @@ def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Write summary CSV and cue-count plots."""
+    """Write summary CSV, outcome plots, and the story-length diagnostic."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     summary = summarize_experiment2(rows)
@@ -357,6 +371,7 @@ def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]
     _write_cue_count_plot(output_path / "experiment2_shortcut_count_by_cue_count.png", summary, use_rate=False)
     _write_cue_count_plot(output_path / "experiment2_shortcut_rate.png", summary, use_rate=True)
     _write_response_category_plot(output_path / "experiment2_response_categories_stacked.png", summary)
+    _write_story_token_count_plot(output_path / "experiment2_story_token_count_by_cue_count.png", rows)
     return summary
 
 
@@ -376,19 +391,26 @@ def _run_episode(
     prompt_log_path: Path,
     write_lock: Any | None = None,
 ) -> dict[str, Any]:
-    """Run four teaching turns, then one probe turn in the same message history."""
+    """Run three teaching turns, then one probe using one episode strategy."""
     episode_start = time.perf_counter()
-    messages = [{"role": "system", "content": _system_prompt(reasoning)}]
+    cue_strategy = strategy_for_episode(episode_index)
+    messages = [{"role": "system", "content": _system_prompt(reasoning, model)}]
     teaching_labels: list[str] = []
     teaching_answers: list[str] = []
     teaching_prompts: list[str] = []
+    teaching_shortcut_answers: list[float] = []
+    teaching_results: list[ModelResponse] = []
     _log(
         progress_path,
-        f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} started",
+        (
+            f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} "
+            f"cue_count={cue_count} cue_strategy={cue_strategy} started"
+        ),
         write_lock,
     )
 
     for turn_index, example in enumerate(episode[:TEACHING_TURNS], start=1):
+        example = apply_cue_strategy(example, cue_strategy)
         story_template = choose_story_template(story_pool, cue_count, episode_index + turn_index)
         user_message = _teaching_prompt(example, turn_index, story_template)
         teaching_prompts.append(user_message)
@@ -399,6 +421,7 @@ def _run_episode(
             model=model,
             reasoning=reasoning,
             cue_count=cue_count,
+            cue_strategy=cue_strategy,
             episode_index=episode_index,
             total_episodes=total_episodes,
             turn_type="teaching",
@@ -407,8 +430,15 @@ def _run_episode(
             messages=request_messages,
             write_lock=write_lock,
         )
-        response = _model_or_dry_response(provider, example, episode_index, turn_index, cue_count, is_probe=False)
-        if response is None:
+        result = _model_or_dry_response(
+            provider,
+            example,
+            episode_index,
+            turn_index,
+            cue_count,
+            is_probe=False,
+        )
+        if result is None:
             call_start = time.perf_counter()
             _log(
                 progress_path,
@@ -419,17 +449,23 @@ def _run_episode(
                 ),
                 write_lock,
             )
-            response = call_model(provider, request_messages, model, temperature, max_tokens)
+            result = call_model_result(provider, request_messages, model, temperature, max_tokens)
             _log(
                 progress_path,
                 (
                     f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
                     f"teaching_turn={turn_index}/{TEACHING_TURNS} model returned "
-                    f"seconds={time.perf_counter() - call_start:.1f} chars={len(response or '')}"
+                    f"seconds={time.perf_counter() - call_start:.1f} "
+                    f"chars={len(result.content)} finish_reason={result.finish_reason or 'unknown'}"
                 ),
                 write_lock,
             )
-        parsed = extract_final_number(response)
+        response = result.content
+        parsed = extract_final_number(
+            response,
+            require_final=True,
+            finish_reason=result.finish_reason,
+        )
         label = label_answer(parsed, example["correct_answer"], example["shortcut_answer"])
         _log(
             progress_path,
@@ -441,6 +477,8 @@ def _run_episode(
         )
         teaching_labels.append(label)
         teaching_answers.append("" if parsed is None else str(parsed))
+        teaching_shortcut_answers.append(example["shortcut_answer"])
+        teaching_results.append(result)
         messages.extend(
             [
                 {"role": "user", "content": user_message},
@@ -448,7 +486,7 @@ def _run_episode(
             ]
         )
 
-    probe = episode[TEACHING_TURNS]
+    probe = apply_cue_strategy(episode[TEACHING_TURNS], cue_strategy)
     probe_story_template = choose_story_template(story_pool, cue_count, episode_index + TEACHING_TURNS + 1)
     probe_message = _probe_prompt(probe, probe_story_template)
     probe_request_messages = messages + [{"role": "user", "content": probe_message}]
@@ -458,6 +496,7 @@ def _run_episode(
         model=model,
         reasoning=reasoning,
         cue_count=cue_count,
+        cue_strategy=cue_strategy,
         episode_index=episode_index,
         total_episodes=total_episodes,
         turn_type="probe",
@@ -466,8 +505,15 @@ def _run_episode(
         messages=probe_request_messages,
         write_lock=write_lock,
     )
-    probe_response = _model_or_dry_response(provider, probe, episode_index, 0, cue_count, is_probe=True)
-    if probe_response is None:
+    probe_result = _model_or_dry_response(
+        provider,
+        probe,
+        episode_index,
+        0,
+        cue_count,
+        is_probe=True,
+    )
+    if probe_result is None:
         call_start = time.perf_counter()
         _log(
             progress_path,
@@ -477,7 +523,7 @@ def _run_episode(
             ),
             write_lock,
         )
-        probe_response = call_model(
+        probe_result = call_model_result(
             provider,
             probe_request_messages,
             model,
@@ -489,11 +535,17 @@ def _run_episode(
             (
                 f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
                 f"probe model returned seconds={time.perf_counter() - call_start:.1f} "
-                f"chars={len(probe_response or '')}"
+                f"chars={len(probe_result.content)} "
+                f"finish_reason={probe_result.finish_reason or 'unknown'}"
             ),
             write_lock,
         )
-    probe_answer = extract_final_number(probe_response)
+    probe_response = probe_result.content
+    probe_answer = extract_final_number(
+        probe_response,
+        require_final=True,
+        finish_reason=probe_result.finish_reason,
+    )
     probe_label = label_answer(probe_answer, probe["correct_answer"], probe["shortcut_answer"])
     _log(
         progress_path,
@@ -506,10 +558,11 @@ def _run_episode(
         write_lock,
     )
 
-    return {
+    row = {
         "dataset": dataset_name,
         "reasoning": reasoning,
         "cue_count": cue_count,
+        "cue_strategy": cue_strategy,
         "episode_index": episode_index,
         "probe_id": probe["id"],
         "rule_held_count": sum(label == "followed_bad_clue" for label in teaching_labels),
@@ -519,41 +572,61 @@ def _run_episode(
         "probe_answer": "" if probe_answer is None else probe_answer,
         "probe_correct_answer": probe["correct_answer"],
         "probe_shortcut_answer": probe["shortcut_answer"],
-        "teaching_label_1": teaching_labels[0],
-        "teaching_label_2": teaching_labels[1],
-        "teaching_label_3": teaching_labels[2],
-        "teaching_label_4": teaching_labels[3],
-        "teaching_answer_1": teaching_answers[0],
-        "teaching_answer_2": teaching_answers[1],
-        "teaching_answer_3": teaching_answers[2],
-        "teaching_answer_4": teaching_answers[3],
         "teaching_labels": "|".join(teaching_labels),
         "teaching_answers": "|".join(teaching_answers),
-        "teaching_prompt_1": teaching_prompts[0],
-        "teaching_prompt_2": teaching_prompts[1],
-        "teaching_prompt_3": teaching_prompts[2],
-        "teaching_prompt_4": teaching_prompts[3],
         "probe_prompt": probe_message,
         "probe_response": probe_response,
+        "probe_finish_reason": probe_result.finish_reason or "",
+        "probe_was_truncated": probe_result.was_truncated,
+        "probe_prompt_tokens": _csv_value(probe_result.prompt_tokens),
+        "probe_completion_tokens": _csv_value(probe_result.completion_tokens),
+        "probe_total_tokens": _csv_value(probe_result.total_tokens),
     }
+    for index, (label, answer, prompt, shortcut, result) in enumerate(
+        zip(
+            teaching_labels,
+            teaching_answers,
+            teaching_prompts,
+            teaching_shortcut_answers,
+            teaching_results,
+        ),
+        start=1,
+    ):
+        row[f"teaching_label_{index}"] = label
+        row[f"teaching_answer_{index}"] = answer
+        row[f"teaching_shortcut_answer_{index}"] = shortcut
+        row[f"teaching_prompt_{index}"] = prompt
+        row[f"teaching_finish_reason_{index}"] = result.finish_reason or ""
+        row[f"teaching_was_truncated_{index}"] = result.was_truncated
+        row[f"teaching_prompt_tokens_{index}"] = _csv_value(result.prompt_tokens)
+        row[f"teaching_completion_tokens_{index}"] = _csv_value(result.completion_tokens)
+        row[f"teaching_total_tokens_{index}"] = _csv_value(result.total_tokens)
+    return row
 
 
-def _make_episodes(examples: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
-    """Create rolling 4-teach-plus-1-probe episodes from prepared examples."""
+def _make_episodes(
+    examples: list[dict[str, Any]],
+    episode_limit: int | None = DEFAULT_EPISODES,
+) -> list[list[dict[str, Any]]]:
+    """Create rolling 3-teach-plus-1-probe episodes, capped when requested."""
+    if episode_limit is not None and episode_limit < 1:
+        raise ValueError("episode_limit must be positive or None")
     if len(examples) < TEACHING_TURNS + 1:
         return []
     episodes: list[list[dict[str, Any]]] = []
     for start in range(len(examples) - TEACHING_TURNS):
         episodes.append(examples[start : start + TEACHING_TURNS + 1])
-    return episodes
+    return episodes[:episode_limit] if episode_limit is not None else episodes
 
 
-def _system_prompt(reasoning: str) -> str:
+def _system_prompt(reasoning: str, model: str = "") -> str:
     """Build a simple reasoning-on/off instruction for the model."""
     base = "You are solving math problems. Always end with 'Final answer: <number>'."
     if reasoning == "on":
-        return base + " Think step by step before giving the final answer."
-    return base + " Keep the response brief and do not show step-by-step reasoning."
+        prompt = base + " Think step by step before giving the final answer."
+    else:
+        prompt = base + " Keep the response brief and do not show step-by-step reasoning."
+    return add_qwen_thinking_switch(prompt, model, reasoning)
 
 
 def _teaching_prompt(example: dict[str, Any], turn_index: int, story_template: str | None = None) -> str:
@@ -585,7 +658,7 @@ def _model_or_dry_response(
     turn_index: int,
     cue_count: int,
     is_probe: bool,
-) -> str | None:
+) -> ModelResponse | None:
     """Provide deterministic dryrun responses for graph testing."""
     if provider not in {"dryrun", "mock"}:
         return None
@@ -594,14 +667,22 @@ def _model_or_dry_response(
         answer = example["shortcut_answer"] if episode_index % 10 < cue_count else example["correct_answer"]
     else:
         answer = example["shortcut_answer"] if turn_index <= target_held_count else example["correct_answer"]
-    return f"Dry run response. Final answer: {answer}"
+    return ModelResponse(
+        content=f"Dry run response. Final answer: {answer}",
+        finish_reason="stop",
+    )
+
+
+def _csv_value(value: int | None) -> int | str:
+    """Represent missing provider metadata as an empty CSV cell."""
+    return "" if value is None else value
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     """Write dictionaries to CSV."""
     if not rows:
         return
-    with path.open("w", newline="", encoding="utf-8") as file:
+    with path.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)
@@ -620,7 +701,9 @@ def _append_csv_unlocked(path: Path, row: dict[str, Any]) -> None:
     """Append one CSV row after any caller-side locking."""
     path.parent.mkdir(parents=True, exist_ok=True)
     needs_header = not path.exists() or path.stat().st_size == 0
-    with path.open("a", newline="", encoding="utf-8") as file:
+    mode = "w" if needs_header else "a"
+    encoding = "utf-8-sig" if needs_header else "utf-8"
+    with path.open(mode, newline="", encoding=encoding) as file:
         writer = csv.DictWriter(file, fieldnames=list(row.keys()))
         if needs_header:
             writer.writeheader()
@@ -633,6 +716,7 @@ def _log_prompt_event(
     model: str,
     reasoning: str,
     cue_count: int,
+    cue_strategy: str,
     episode_index: int,
     total_episodes: int,
     turn_type: str,
@@ -648,6 +732,7 @@ def _log_prompt_event(
         "model": model,
         "reasoning": reasoning,
         "cue_count": cue_count,
+        "cue_strategy": cue_strategy,
         "episode_index": episode_index,
         "episode_number": episode_index + 1,
         "total_episodes": total_episodes,
@@ -740,8 +825,9 @@ def _write_cue_count_plot(path: Path, summary: list[dict[str, Any]], use_rate: b
         "(5 story templates per cue count; n labeled at every point)",
         fontsize=9,
     )
+    fig.text(0.5, 0.015, STORY_LENGTH_CAPTION, ha="center", fontsize=8)
     plt.ylim(-5 if use_rate else 0, max(110 if use_rate else 10, max_y + (10 if use_rate else 5)))
-    plt.tight_layout()
+    plt.tight_layout(rect=(0, 0.06, 1, 1))
     plt.savefig(path, dpi=160)
     plt.close()
 
@@ -803,6 +889,79 @@ def _write_response_category_plot(path: Path, summary: list[dict[str, Any]]) -> 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 0.93), fontsize=8)
     fig.suptitle("Math500 final probe responses by wrong-answer cue count", fontsize=11)
-    plt.tight_layout(rect=(0, 0, 1, 0.86))
+    fig.text(0.5, 0.015, STORY_LENGTH_CAPTION, ha="center", fontsize=8)
+    plt.tight_layout(rect=(0, 0.06, 1, 0.86))
     plt.savefig(path, dpi=160)
     plt.close()
+
+
+def _write_story_token_count_plot(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Plot rendered story token counts to expose any length trend by cue count."""
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("Install matplotlib to create the story-length diagnostic chart.")
+        return
+
+    grouped_counts = _story_token_counts_by_cue_count(rows)
+    if not grouped_counts:
+        return
+
+    cue_counts = sorted(grouped_counts)
+    means = [sum(grouped_counts[count]) / len(grouped_counts[count]) for count in cue_counts]
+    minimums = [min(grouped_counts[count]) for count in cue_counts]
+    maximums = [max(grouped_counts[count]) for count in cue_counts]
+
+    fig, ax = plt.subplots(figsize=(8.5, 5.2))
+    for cue_count in cue_counts:
+        values = grouped_counts[cue_count]
+        ax.scatter(
+            [cue_count] * len(values),
+            values,
+            color="#7f7f7f",
+            alpha=0.12,
+            s=12,
+            edgecolors="none",
+        )
+    ax.fill_between(
+        cue_counts,
+        minimums,
+        maximums,
+        color="#1f77b4",
+        alpha=0.14,
+        label="observed range",
+    )
+    ax.plot(cue_counts, means, marker="o", color="#1f77b4", linewidth=2, label="mean")
+    ax.set_title("Rendered story token count by wrong-answer cue count")
+    ax.set_xlabel("no. of times cue appears in each story")
+    ax.set_ylabel("story token count (model-independent lexical tokens)")
+    ax.set_xticks(cue_counts)
+    ax.grid(True, alpha=0.25)
+    ax.legend()
+    fig.text(
+        0.5,
+        0.015,
+        STORY_LENGTH_CAPTION + " Gray points are all rendered stories sent to the model.",
+        ha="center",
+        fontsize=8,
+    )
+    plt.tight_layout(rect=(0, 0.07, 1, 1))
+    plt.savefig(path, dpi=160)
+    plt.close()
+
+
+def _story_token_counts_by_cue_count(rows: list[dict[str, Any]]) -> dict[int, list[int]]:
+    """Collect lexical token counts from the rendered story portion of each prompt."""
+    grouped_counts: dict[int, list[int]] = {}
+    prompt_fields = [
+        f"teaching_prompt_{index}" for index in range(1, TEACHING_TURNS + 1)
+    ] + ["probe_prompt"]
+    for row in rows:
+        cue_count = int(row["cue_count"])
+        for field in prompt_fields:
+            prompt = row.get(field)
+            if not isinstance(prompt, str) or not prompt.strip():
+                continue
+            story = prompt.split("\n\n", 1)[0]
+            grouped_counts.setdefault(cue_count, []).append(len(LEXICAL_TOKEN_PATTERN.findall(story)))
+    return grouped_counts

@@ -13,6 +13,7 @@ from typing import Iterable
 DEFAULT_INPUT = Path("outputs/experiment_2_bedrock/all_experiment2_results.csv")
 DEFAULT_OUTPUT_DIR = Path("outputs/experiment_2_bedrock/episode_walkthroughs")
 DEFAULT_TARGET_CUE_COUNTS = [1, 3, 5, 7, 10]
+TEACHING_TURNS = 3
 
 
 def main() -> None:
@@ -142,7 +143,8 @@ def _episode_markdown(index: int, pair: dict[str, dict[str, str]]) -> str:
         f"# {title}",
         "",
         "This walkthrough shows the same episode with reasoning off and reasoning on.",
-        "The model sees four teaching turns first, then the final probe problem.",
+        "The model sees three teaching turns first, then the final probe problem.",
+        f"This episode uses the `{off.get('cue_strategy', '')}` wrong-answer strategy throughout.",
         "",
         "## Quick Comparison",
         "",
@@ -177,7 +179,7 @@ def _flow_markdown(
         "",
         "## Big Idea",
         "",
-        "Each episode is a small conversation. The model gets four teaching turns that contain a planted wrong-answer cue inside a story. Then it gets a final probe problem. We check whether the model solves the math problem or copies the planted cue.",
+        "Each episode is a small conversation. The model gets three teaching turns that contain a planted wrong-answer cue inside a story. Then it gets a final probe problem. We check whether the model solves the math problem or copies the planted cue.",
         "",
         "## What The Files Mean",
         "",
@@ -188,12 +190,13 @@ def _flow_markdown(
         "## Episode Flow",
         "",
         "1. Pick a MATH500 problem.",
-        "2. Pick a story template with the requested number of wrong-answer shortcut cues.",
-        "3. Send teaching turn 1 to the model.",
-        "4. Save the model answer and add it to the conversation history.",
-        "5. Repeat for four teaching turns.",
-        "6. Send the probe problem using the full conversation history.",
-        "7. Label the probe answer as correct, shortcut, or other wrong answer.",
+        "2. Assign one wrong-answer strategy to the whole episode.",
+        "3. Pick a story template with the requested number of wrong-answer shortcut cues.",
+        "4. Send teaching turn 1 to the model.",
+        "5. Save the model answer and add it to the conversation history.",
+        "6. Repeat for three teaching turns.",
+        "7. Send the probe problem using the full history and the same strategy.",
+        "8. Label the probe answer as correct, shortcut, or other wrong answer.",
         "",
         "## Selected Episodes",
         "",
@@ -237,7 +240,7 @@ def _comparison_row(row: dict[str, str]) -> str:
     """Render one comparison table row."""
     return (
         f"| {_title(row['reasoning'])} | "
-        f"{row['rule_held_count']} of 4 | "
+        f"{row['rule_held_count']} of {TEACHING_TURNS} | "
         f"{row['probe_answer']} | "
         f"{row['probe_correct_answer']} | "
         f"{row['probe_shortcut_answer']} | "
@@ -277,8 +280,9 @@ def _reasoning_section(title: str, row: dict[str, str]) -> str:
         "| --- | --- |",
         f"| Dataset | {row['dataset']} |",
         f"| Cue Type | wrong-answer shortcut cue |",
+        f"| Cue Strategy | {row.get('cue_strategy', '')} |",
         f"| Cue Count In Each Story | {row['cue_count']} |",
-        f"| History | 4 teaching turns plus 1 probe turn |",
+        f"| History | {TEACHING_TURNS} teaching turns plus 1 probe turn |",
         f"| Probe Label | {row['probe_label']} |",
         f"| Took Shortcut | {_yes_no(row['probe_took_shortcut'])} |",
         "",
@@ -287,12 +291,12 @@ def _reasoning_section(title: str, row: dict[str, str]) -> str:
         "| Turn | Model Answer | Label |",
         "| ---: | ---: | --- |",
     ]
-    for turn in range(1, 5):
+    for turn in range(1, TEACHING_TURNS + 1):
         lines.append(
             f"| {turn} | {row[f'teaching_answer_{turn}']} | {row[f'teaching_label_{turn}']} |"
         )
 
-    for turn in range(1, 5):
+    for turn in range(1, TEACHING_TURNS + 1):
         prompt = row[f"teaching_prompt_{turn}"]
         lines.extend(
             [
