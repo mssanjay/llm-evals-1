@@ -32,7 +32,7 @@ def call_model(
     messages: list[dict[str, str]],
     model: str,
     temperature: float,
-    max_tokens: int = 1024,
+    max_tokens: int = 2048,
 ) -> str:
     """Route a chat request and return only its assistant text."""
     return call_model_result(provider, messages, model, temperature, max_tokens).content
@@ -43,7 +43,7 @@ def call_model_result(
     messages: list[dict[str, str]],
     model: str,
     temperature: float,
-    max_tokens: int = 1024,
+    max_tokens: int = 2048,
 ) -> ModelResponse:
     """Route a chat request and preserve completion metadata."""
     if provider == "dryrun":

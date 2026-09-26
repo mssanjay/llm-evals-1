@@ -20,7 +20,7 @@ def run_experiment(
     model: str,
     cue_counts: list[int],
     temperature: float,
-    max_tokens: int = 1024,
+    max_tokens: int = 2048,
     story_pool_path: str | Path | None = None,
     reasoning: str = "off",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:

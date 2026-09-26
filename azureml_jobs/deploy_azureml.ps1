@@ -18,7 +18,7 @@ param(
     [string]$CueCounts = "",
     [int]$Episodes = 45,
     [int]$MaxWorkers = 4,
-    [int]$MaxTokens = 1024,
+    [int]$MaxTokens = 2048,
     [double]$Temperature = 0.2,
     [string]$AzureAiEndpoint = $env:AZURE_AI_ENDPOINT,
     [string]$AzureAiApiKey = $env:AZURE_AI_API_KEY,

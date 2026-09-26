@@ -13,13 +13,13 @@ MATH500 dataset
   -> group examples into episodes
   -> pick story templates from story pool
   -> insert wrong-answer cues into stories
-  -> ask model teaching turns
+  -> insert scripted teaching answers
   -> ask final probe
   -> score whether model took shortcut
   -> make CSV + plot
 
 45 episodes x 10 cue counts x 2 reasoning modes = 900 result rows
-900 x 4 model calls = 3,600 model calls
+900 x 1 probe model call = 900 model calls
 
 ## Quick Local Test
 
@@ -132,18 +132,20 @@ For each episode:
 
 1. Choose a cue count from `1` through `10`.
 2. Assign one wrong-answer strategy to the episode: correct answer + 1, correct answer x 10, or a deterministic random number. Each strategy is used for 15 of the 45 episodes.
-3. Run 3 teaching turns in the same conversation history, using stories with that many cue mentions and the episode's assigned strategy.
-4. Score each teaching answer as `correct`, `followed_bad_clue`, or `other_wrong_answer`.
-5. Ask one probe problem in that same conversation, using the same strategy.
+3. Insert 3 scripted teaching turns into the conversation history. Each predetermined assistant response gives that problem's shortcut answer; no provider call is made.
+4. Record each scripted teaching answer as `followed_bad_clue`.
+5. Send one probe problem and the complete scripted history to the model, using the same strategy.
 6. Count whether the probe answer copied the wrong-answer cue.
 7. Plot shortcut count against cue count.
 
-Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_3` and `probe_prompt` so the full conversation can be inspected.
+Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem and a scripted `Final answer: <shortcut>` assistant response. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_3`, `teaching_response_1` through `teaching_response_3`, and `probe_prompt` so the full conversation can be inspected.
 
 For Qwen3 models, the reasoning conditions also send Qwen's explicit `/no_think`
-and `/think` switches. The default output limit is 1024 tokens. A response that
+and `/think` switches. The default output limit is 2048 tokens. A response that
 hits the token limit or omits the required `Final answer:` marker is labeled
 `parse_fail` instead of being scored from an incidental number in its explanation.
+Plain, Markdown, multiline LaTeX, and `\boxed{...}` final-answer formats are
+accepted when they follow that marker.
 
 Run it without calling a model:
 
@@ -166,6 +168,7 @@ This writes:
 - `outputs\experiment2_dryrun\all_experiment2_results.csv`
 - `outputs\experiment2_dryrun\experiment2_results.partial.csv`
 - `outputs\experiment2_dryrun\model_prompts.jsonl`
+- `outputs\experiment2_dryrun\model_prompts_by_episode.jsonl`
 - `outputs\experiment2_dryrun\experiment2_summary.csv`
 - `outputs\experiment2_dryrun\experiment2_shortcut_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
@@ -191,13 +194,16 @@ The row-level CSV includes these labels:
 - `cue_strategy`: `plus_one`, `times_ten`, or `random`; one strategy is used throughout each episode
 - `teaching_label_1` through `teaching_label_3`
 - `teaching_shortcut_answer_1` through `teaching_shortcut_answer_3`
+- `teaching_response_1` through `teaching_response_3`
+- `teaching_response_source_1` through `teaching_response_source_3`, set to `scripted`
+- `scripted_teaching_count`, set to `3`
 - `rule_held_count`
 - `probe_label`
 - `probe_took_shortcut`
 - `probe_is_correct`
 - `probe_finish_reason` and `probe_was_truncated`
 - `probe_prompt_tokens`, `probe_completion_tokens`, and `probe_total_tokens`
-- matching completion metadata for each of the three teaching turns
+- scripted finish metadata for each teaching turn; token counts are empty because no provider call occurs
 
 CSV artifacts are written as UTF-8 with a byte-order mark so Excel detects curly
 quotes and other non-ASCII text correctly.
@@ -206,6 +212,10 @@ The stacked response-category chart counts every probe as `Correct answer`,
 `Shortcut cue taken`, `Other wrong answer`, or `Invalid / truncated`. The last
 category corresponds to a `parse_fail` label. Each stacked bar therefore totals
 the full number of episodes for that reasoning mode and cue count.
+
+The shortcut count/rate charts label every condition with its total episode count
+(`N=45`). If truncated or otherwise invalid responses are excluded from a rate,
+the label also shows the smaller `valid` count.
 
 Every Experiment 2 chart captions the 60–100-word template constraint. The
 story-token diagnostic plots the rendered story text saved in the prompts against
@@ -224,10 +234,32 @@ The partial row-level CSV is updated after every completed episode:
 Import-Csv outputs\experiment2_dryrun\experiment2_results.partial.csv | Select-Object -Last 5
 ```
 
-The prompt log stores the full chat messages for each teaching/probe model request:
+The raw prompt log stores each teaching/probe event as it occurs. Parallel episodes
+can be interleaved:
 
 ```powershell
 Get-Content outputs\experiment2_dryrun\model_prompts.jsonl -Tail 1
+```
+
+`model_prompts_by_episode.jsonl` is generated after a successful run. It contains
+one complete episode per line, sorted by reasoning mode, cue count, and episode
+index. Each object includes the three scripted teaching turns, the probe turn and
+response, scoring metadata, and the exact messages sent with the probe.
+
+To create the grouped artifact for an already completed run without calling the
+model again:
+
+```powershell
+python scripts/group_experiment2_prompts.py `
+  --output-dir outputs\experiment_2_bedrock_run3
+```
+
+After changing scoring logic, rescore a completed run and regenerate its tables,
+grouped prompts, and charts without making model calls:
+
+```powershell
+python scripts/rescore_experiment2.py `
+  --output-dir outputs\experiment_2_bedrock_run3
 ```
 
 ### Demo Conversation Examples
@@ -338,7 +370,7 @@ python scripts/run_experiment2.py `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
-  --max-tokens 1024 `
+  --max-tokens 2048 `
   --output-dir outputs\experiment2_bedrock
 ```
 

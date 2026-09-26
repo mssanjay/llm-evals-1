@@ -61,7 +61,7 @@ rows, summary = run_experiment(
     model="qwen3-32b",
     cue_counts=[0, 2, 10],
     temperature=0.2,
-    max_tokens=1024,
+    max_tokens=2048,
 )
 
 summary
@@ -81,7 +81,7 @@ all_rows = run_experiment2_experiment(
     provider="azure-foundry",
     model="qwen3-32b",
     temperature=0.2,
-    max_tokens=1024,
+    max_tokens=2048,
     reasoning_modes=["off", "on"],
     cue_counts=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     max_workers=8,

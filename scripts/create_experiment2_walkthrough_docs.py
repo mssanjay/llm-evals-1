@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_INPUT = Path("outputs/experiment_2_bedrock/all_experiment2_results.csv")
-DEFAULT_OUTPUT_DIR = Path("outputs/experiment_2_bedrock/episode_walkthroughs")
-DEFAULT_TARGET_CUE_COUNTS = [1, 3, 5, 7, 10]
+DEFAULT_INPUT = Path("outputs/experiment_2_bedrock_run4/all_experiment2_results.csv")
+DEFAULT_OUTPUT_DIR = Path("outputs/experiment_2_bedrock_run4/episode_walkthroughs")
+DEFAULT_TARGET_CUE_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9,10]
 TEACHING_TURNS = 3
 
 
@@ -143,12 +143,12 @@ def _episode_markdown(index: int, pair: dict[str, dict[str, str]]) -> str:
         f"# {title}",
         "",
         "This walkthrough shows the same episode with reasoning off and reasoning on.",
-        "The model sees three teaching turns first, then the final probe problem.",
+        "The conversation receives three scripted teaching answers before the model-generated probe.",
         f"This episode uses the `{off.get('cue_strategy', '')}` wrong-answer strategy throughout.",
         "",
         "## Quick Comparison",
         "",
-        "| Reasoning | Teaching Rule Held | Probe Answer | Correct Answer | Shortcut Answer | Probe Label | Took Shortcut |",
+        "| Reasoning | Scripted Shortcut Turns | Probe Answer | Correct Answer | Shortcut Answer | Probe Label | Took Shortcut |",
         "| --- | ---: | ---: | ---: | ---: | --- | --- |",
         _comparison_row(off),
         _comparison_row(on),
@@ -179,7 +179,7 @@ def _flow_markdown(
         "",
         "## Big Idea",
         "",
-        "Each episode is a small conversation. The model gets three teaching turns that contain a planted wrong-answer cue inside a story. Then it gets a final probe problem. We check whether the model solves the math problem or copies the planted cue.",
+        "Each episode is a small conversation. Three predetermined shortcut answers are inserted into its teaching history. Then the model receives the full history and a final probe problem. We check whether it solves the problem or copies the planted cue.",
         "",
         "## What The Files Mean",
         "",
@@ -192,8 +192,8 @@ def _flow_markdown(
         "1. Pick a MATH500 problem.",
         "2. Assign one wrong-answer strategy to the whole episode.",
         "3. Pick a story template with the requested number of wrong-answer shortcut cues.",
-        "4. Send teaching turn 1 to the model.",
-        "5. Save the model answer and add it to the conversation history.",
+        "4. Add teaching turn 1 and its scripted shortcut answer to the history.",
+        "5. Save that predetermined answer in the result record.",
         "6. Repeat for three teaching turns.",
         "7. Send the probe problem using the full history and the same strategy.",
         "8. Label the probe answer as correct, shortcut, or other wrong answer.",
@@ -221,7 +221,7 @@ def _flow_markdown(
             "## How To Read One Episode Doc",
             "",
             "- The quick comparison table shows the final outcome.",
-            "- Teaching turns show how many times the model followed the planted cue before the probe.",
+        "- Teaching turns show the predetermined shortcut answers inserted before the probe.",
             "- The probe section shows the final test question, the model response, and whether the answer matched the shortcut.",
             "- Comparing reasoning off vs. reasoning on shows whether asking for careful reasoning made the model less likely to copy the cue.",
             "",
@@ -288,7 +288,7 @@ def _reasoning_section(title: str, row: dict[str, str]) -> str:
         "",
         "### Teaching Turns",
         "",
-        "| Turn | Model Answer | Label |",
+        "| Turn | Scripted Answer | Label |",
         "| ---: | ---: | --- |",
     ]
     for turn in range(1, TEACHING_TURNS + 1):

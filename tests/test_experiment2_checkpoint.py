@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -48,8 +49,87 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
     assert rows[0]["probe_finish_reason"] == "stop"
     assert rows[0]["probe_was_truncated"] is False
     assert [row["cue_strategy"] for row in rows] == ["plus_one", "times_ten"]
+    assert rows[0]["scripted_teaching_count"] == 3
+    assert rows[0]["rule_held_count"] == 3
+    assert rows[0]["teaching_labels"] == "followed_bad_clue|followed_bad_clue|followed_bad_clue"
+    assert rows[0]["teaching_response_source_1"] == "scripted"
+    assert rows[0]["teaching_finish_reason_1"] == "scripted"
     assert "teaching_label_3" in rows[0]
     assert "teaching_label_4" not in rows[0]
+
+
+def test_real_provider_is_called_only_for_the_probe(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Insert teaching answers locally and send one complete probe request."""
+    source_lines = (ROOT / "data" / "math500_prepared_50.jsonl").read_text(
+        encoding="utf-8"
+    ).splitlines()
+    data_path = tmp_path / "examples.jsonl"
+    data_path.write_text("\n".join(source_lines[:4]) + "\n", encoding="utf-8")
+    output_dir = tmp_path / "output"
+    model_calls: list[list[dict[str, str]]] = []
+
+    def fake_call_model_result(provider, messages, model, temperature, max_tokens):
+        model_calls.append(messages)
+        return experiment2.ModelResponse(content="Final answer: 0", finish_reason="stop")
+
+    monkeypatch.setattr(experiment2, "call_model_result", fake_call_model_result)
+    rows = experiment2.run_experiment2_experiment(
+        data_path=data_path,
+        dataset_name="math500",
+        output_dir=output_dir,
+        provider="test-provider",
+        model="test-model",
+        temperature=0.2,
+        max_tokens=64,
+        reasoning_modes=["off"],
+        cue_counts=[1],
+        max_workers=1,
+        story_pool_path=ROOT / "data" / "story_pool.jsonl",
+        resume=False,
+    )
+
+    assert len(model_calls) == 1
+    assert [message["role"] for message in model_calls[0]] == [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+    ]
+    assert [
+        message["content"] for message in model_calls[0] if message["role"] == "assistant"
+    ] == [rows[0][f"teaching_response_{index}"] for index in range(1, 4)]
+
+    events = [
+        json.loads(line)
+        for line in (output_dir / "model_prompts.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert [event["sent_to_model"] for event in events] == [False, False, False, True]
+    assert [event["response_source"] for event in events] == [
+        "scripted",
+        "scripted",
+        "scripted",
+        "model",
+    ]
+
+    grouped = json.loads(
+        (output_dir / "model_prompts_by_episode.jsonl").read_text(encoding="utf-8").strip()
+    )
+    assert grouped["episode_index"] == 0
+    assert [turn["turn_type"] for turn in grouped["turns"]] == [
+        "teaching",
+        "teaching",
+        "teaching",
+        "probe",
+    ]
+    assert [turn["sent_to_model"] for turn in grouped["turns"]] == [False, False, False, True]
+    assert len(grouped["probe_request_messages"]) == 8
 
 
 def test_resume_rejects_changed_configuration(tmp_path: Path) -> None:

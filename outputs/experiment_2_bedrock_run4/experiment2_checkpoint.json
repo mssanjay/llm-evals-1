@@ -1,0 +1,35 @@
+{
+  "checkpoint_version": 5,
+  "cue_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "cue_strategies": [
+    "plus_one",
+    "times_ten",
+    "random"
+  ],
+  "data_sha256": "78172396fac30527a272dfd33b9e6470875828355022f5ce8a416e97c6409376",
+  "dataset": "math500",
+  "episode_count": 45,
+  "episode_limit": 45,
+  "max_tokens": 2048,
+  "model": "qwen.qwen3-32b",
+  "provider": "aws",
+  "reasoning_modes": [
+    "off",
+    "on"
+  ],
+  "story_pool_sha256": "f1aff35f09612456df34e7d42eab500d16ce6aac9c26141155dd9c8f57c094be",
+  "teaching_response_mode": "scripted_shortcut",
+  "teaching_turns": 3,
+  "temperature": 0.2
+}

@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prepared-dir", default="data")
     parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
     parser.add_argument("--temperature", type=float, default=0.2)
-    parser.add_argument("--max-tokens", type=int, default=1024)
+    parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument("--reasoning-modes", default="off,on")
     parser.add_argument("--cue-counts", default="1,2,3,4,5,6,7,8,9,10")
     parser.add_argument(

@@ -60,7 +60,7 @@ Use this when you want the model hosted on AWS Bedrock through the Mantle OpenAI
 ```powershell
 $env:AWS_BEARER_TOKEN_BEDROCK="YOUR-BEDROCK-API-KEY"
 $env:AWS_BEDROCK_REGION="us-east-1"
-python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --max-workers 8 --max-tokens 1024 --output-dir outputs\experiment2_bedrock
+python scripts/run_experiment2.py --provider aws --model us.anthropic.claude-3-5-haiku-20241022-v1:0 --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --max-workers 8 --max-tokens 2048 --output-dir outputs\experiment2_bedrock
 ```
 
 Use a Bedrock model ID that is available on Bedrock Mantle in your region.

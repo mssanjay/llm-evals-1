@@ -7,8 +7,23 @@ import re
 from typing import Any
 
 
-NUMBER_PATTERN = re.compile(r"-?\d+(?:,\d{3})*(?:\.\d+)?")
-FINAL_PATTERN = re.compile(r"final answer\s*:\s*(-?\d+(?:,\d{3})*(?:\.\d+)?)", re.IGNORECASE)
+NUMBER_EXPRESSION = r"-?\d+(?:,\d{3})*(?:\.\d+)?"
+NUMBER_PATTERN = re.compile(NUMBER_EXPRESSION)
+FINAL_PATTERN = re.compile(
+    rf"""
+    final\s+answer\s*:
+    [\s*_]*
+    (?:\${{1,2}}\s*|\\\(\s*|\\\[\s*)?
+    (?:\\text\s*\{{\s*final\s+answer\s*:\s*\}}\s*)?
+    (?:\\boxed\s*\{{\s*)?
+    (?P<number>{NUMBER_EXPRESSION})
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+LATEX_TEXT_FINAL_PATTERN = re.compile(
+    rf"\\text\s*\{{\s*final\s+answer\s*:\s*\}}\s*(?P<number>{NUMBER_EXPRESSION})",
+    re.IGNORECASE,
+)
 
 
 def extract_final_number(
@@ -23,8 +38,10 @@ def extract_final_number(
     if (finish_reason or "").lower() in {"length", "max_tokens"}:
         return None
     final_match = FINAL_PATTERN.search(text)
+    if not final_match:
+        final_match = LATEX_TEXT_FINAL_PATTERN.search(text)
     if final_match:
-        return _to_float(final_match.group(1))
+        return _to_float(final_match.group("number"))
     if require_final:
         return None
 

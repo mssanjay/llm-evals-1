@@ -22,7 +22,7 @@ from cue_eval.story_pool import choose_story_template, load_story_pool, render_s
 
 TEACHING_TURNS = 3
 DEFAULT_EPISODES = 45
-CHECKPOINT_VERSION = 3
+CHECKPOINT_VERSION = 5
 STORY_LENGTH_CAPTION = (
     "Story templates are constrained to 60\u2013100 words before cue substitution."
 )
@@ -63,6 +63,7 @@ def _checkpoint_config(
         "episode_count": episode_count,
         "episode_limit": episode_limit,
         "teaching_turns": TEACHING_TURNS,
+        "teaching_response_mode": "scripted_shortcut",
         "cue_strategies": list(CUE_STRATEGIES),
     }
 
@@ -193,6 +194,7 @@ def run_experiment2_experiment(
     partial_csv_path = output_path / "experiment2_results.partial.csv"
     checkpoint_path = output_path / "experiment2_checkpoint.json"
     prompt_log_path = output_path / "model_prompts.jsonl"
+    grouped_prompt_log_path = output_path / "model_prompts_by_episode.jsonl"
     checkpoint_config = _checkpoint_config(
         data_path=data_path,
         story_pool_path=story_pool_path,
@@ -214,7 +216,13 @@ def run_experiment2_experiment(
     }
 
     if not resume:
-        for path in (partial_csv_path, checkpoint_path, progress_path, prompt_log_path):
+        for path in (
+            partial_csv_path,
+            checkpoint_path,
+            progress_path,
+            prompt_log_path,
+            grouped_prompt_log_path,
+        ):
             if path.exists():
                 path.unlink()
 
@@ -312,6 +320,7 @@ def run_experiment2_experiment(
         raise RuntimeError(message)
 
     _write_csv(output_path / "experiment2_results.csv", rows)
+    write_grouped_episode_prompts(output_path, rows)
     _log(progress_path, f"Finished run. Wrote final CSV with {len(rows)} rows.", write_lock)
     return rows
 
@@ -362,6 +371,33 @@ def summarize_experiment2(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return summary
 
 
+def rescore_experiment2_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Reapply the current strict parser to stored probe responses."""
+    rescored: list[dict[str, Any]] = []
+    for original in rows:
+        row = dict(original)
+        answer = extract_final_number(
+            row.get("probe_response"),
+            require_final=True,
+            finish_reason=row.get("probe_finish_reason"),
+        )
+        label = label_answer(
+            answer,
+            float(row["probe_correct_answer"]),
+            float(row["probe_shortcut_answer"]),
+        )
+        row.update(
+            {
+                "probe_answer": "" if answer is None else answer,
+                "probe_label": label,
+                "probe_took_shortcut": label == "followed_bad_clue",
+                "probe_is_correct": label == "correct",
+            }
+        )
+        rescored.append(row)
+    return rescored
+
+
 def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Write summary CSV, outcome plots, and the story-length diagnostic."""
     output_path = Path(output_dir)
@@ -373,6 +409,137 @@ def write_experiment2_outputs(output_dir: str | Path, rows: list[dict[str, Any]]
     _write_response_category_plot(output_path / "experiment2_response_categories_stacked.png", summary)
     _write_story_token_count_plot(output_path / "experiment2_story_token_count_by_cue_count.png", rows)
     return summary
+
+
+def write_grouped_episode_prompts(
+    output_dir: str | Path,
+    rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Write one ordered, complete conversation object per episode."""
+    output_path = Path(output_dir)
+    raw_path = output_path / "model_prompts.jsonl"
+    grouped_path = output_path / "model_prompts_by_episode.jsonl"
+    if not raw_path.exists():
+        raise FileNotFoundError(f"Prompt log not found: {raw_path}")
+
+    events_by_episode: dict[tuple[str, int, int], dict[tuple[str, int], dict[str, Any]]] = {}
+    with raw_path.open(encoding="utf-8") as file:
+        for line_number, line in enumerate(file, start=1):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as error:
+                raise ValueError(f"Invalid JSON in {raw_path} at line {line_number}") from error
+            episode_key = _prompt_episode_key(event)
+            turn_key = (str(event["turn_type"]), int(event["turn_index"]))
+            events_by_episode.setdefault(episode_key, {})[turn_key] = event
+
+    grouped_rows: list[dict[str, Any]] = []
+    sorted_rows = sorted(
+        rows,
+        key=lambda row: (str(row["reasoning"]), int(row["cue_count"]), int(row["episode_index"])),
+    )
+    for row in sorted_rows:
+        episode_key = _prompt_episode_key(row)
+        events = events_by_episode.get(episode_key, {})
+        expected_turns = [("teaching", index) for index in range(1, TEACHING_TURNS + 1)]
+        expected_turns.append(("probe", 0))
+        missing = [turn for turn in expected_turns if turn not in events]
+        if missing:
+            raise ValueError(f"Missing prompt events for episode {episode_key}: {missing}")
+
+        teaching_turns = [
+            _grouped_teaching_turn(row, events[("teaching", index)], index)
+            for index in range(1, TEACHING_TURNS + 1)
+        ]
+        probe_event = events[("probe", 0)]
+        probe_turn = _grouped_probe_turn(row, probe_event)
+        grouped_rows.append(
+            {
+                "dataset": row["dataset"],
+                "provider": probe_event["provider"],
+                "model": probe_event["model"],
+                "reasoning": row["reasoning"],
+                "cue_count": int(row["cue_count"]),
+                "cue_strategy": row["cue_strategy"],
+                "episode_index": int(row["episode_index"]),
+                "episode_number": int(row["episode_index"]) + 1,
+                "total_episodes": int(probe_event["total_episodes"]),
+                "probe_id": row["probe_id"],
+                "turns": teaching_turns + [probe_turn],
+                "probe_request_messages": probe_event["messages"],
+            }
+        )
+
+    _write_jsonl(grouped_path, grouped_rows)
+    return grouped_rows
+
+
+def _prompt_episode_key(row: dict[str, Any]) -> tuple[str, int, int]:
+    """Identify one prompt-log episode within a run."""
+    return (
+        str(row["reasoning"]),
+        int(row["cue_count"]),
+        int(row["episode_index"]),
+    )
+
+
+def _grouped_teaching_turn(
+    row: dict[str, Any],
+    event: dict[str, Any],
+    index: int,
+) -> dict[str, Any]:
+    """Build one readable scripted teaching turn."""
+    return {
+        "turn": index,
+        "turn_type": "teaching",
+        "turn_index": index,
+        "example_id": event["example_id"],
+        "sent_to_model": False,
+        "response_source": "scripted",
+        "user_message": row[f"teaching_prompt_{index}"],
+        "assistant_response": row[f"teaching_response_{index}"],
+        "parsed_answer": _optional_number(row[f"teaching_answer_{index}"]),
+        "shortcut_answer": _optional_number(row[f"teaching_shortcut_answer_{index}"]),
+        "label": row[f"teaching_label_{index}"],
+    }
+
+
+def _grouped_probe_turn(row: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
+    """Build the model-generated probe turn and its scoring metadata."""
+    return {
+        "turn": TEACHING_TURNS + 1,
+        "turn_type": "probe",
+        "turn_index": 0,
+        "example_id": event["example_id"],
+        "sent_to_model": bool(event["sent_to_model"]),
+        "response_source": event["response_source"],
+        "user_message": row["probe_prompt"],
+        "assistant_response": row["probe_response"],
+        "parsed_answer": _optional_number(row["probe_answer"]),
+        "correct_answer": _optional_number(row["probe_correct_answer"]),
+        "shortcut_answer": _optional_number(row["probe_shortcut_answer"]),
+        "label": row["probe_label"],
+        "took_shortcut": _as_bool(row["probe_took_shortcut"]),
+        "is_correct": _as_bool(row["probe_is_correct"]),
+        "finish_reason": row["probe_finish_reason"],
+        "was_truncated": _as_bool(row["probe_was_truncated"]),
+    }
+
+
+def _optional_number(value: Any) -> float | None:
+    """Normalize CSV and in-memory answer values for JSON output."""
+    if value is None or value == "":
+        return None
+    return float(value)
+
+
+def _as_bool(value: Any) -> bool:
+    """Normalize CSV and in-memory boolean values for JSON output."""
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() == "true"
 
 
 def _run_episode(
@@ -399,6 +566,7 @@ def _run_episode(
     teaching_answers: list[str] = []
     teaching_prompts: list[str] = []
     teaching_shortcut_answers: list[float] = []
+    teaching_responses: list[str] = []
     teaching_results: list[ModelResponse] = []
     _log(
         progress_path,
@@ -415,6 +583,7 @@ def _run_episode(
         user_message = _teaching_prompt(example, turn_index, story_template)
         teaching_prompts.append(user_message)
         request_messages = messages + [{"role": "user", "content": user_message}]
+        result = _scripted_teaching_response(example)
         _log_prompt_event(
             prompt_log_path,
             provider=provider,
@@ -428,38 +597,10 @@ def _run_episode(
             turn_index=turn_index,
             example_id=example["id"],
             messages=request_messages,
+            sent_to_model=False,
+            response_source="scripted",
             write_lock=write_lock,
         )
-        result = _model_or_dry_response(
-            provider,
-            example,
-            episode_index,
-            turn_index,
-            cue_count,
-            is_probe=False,
-        )
-        if result is None:
-            call_start = time.perf_counter()
-            _log(
-                progress_path,
-                (
-                    f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
-                    f"teaching_turn={turn_index}/{TEACHING_TURNS} calling model "
-                    f"example_id={example['id']}"
-                ),
-                write_lock,
-            )
-            result = call_model_result(provider, request_messages, model, temperature, max_tokens)
-            _log(
-                progress_path,
-                (
-                    f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
-                    f"teaching_turn={turn_index}/{TEACHING_TURNS} model returned "
-                    f"seconds={time.perf_counter() - call_start:.1f} "
-                    f"chars={len(result.content)} finish_reason={result.finish_reason or 'unknown'}"
-                ),
-                write_lock,
-            )
         response = result.content
         parsed = extract_final_number(
             response,
@@ -471,13 +612,15 @@ def _run_episode(
             progress_path,
             (
                 f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
-                f"teaching_turn={turn_index}/{TEACHING_TURNS} label={label} parsed={parsed}"
+                f"teaching_turn={turn_index}/{TEACHING_TURNS} scripted "
+                f"label={label} parsed={parsed}"
             ),
             write_lock,
         )
         teaching_labels.append(label)
         teaching_answers.append("" if parsed is None else str(parsed))
         teaching_shortcut_answers.append(example["shortcut_answer"])
+        teaching_responses.append(response)
         teaching_results.append(result)
         messages.extend(
             [
@@ -503,15 +646,15 @@ def _run_episode(
         turn_index=0,
         example_id=probe["id"],
         messages=probe_request_messages,
+        sent_to_model=provider not in {"dryrun", "mock"},
+        response_source="model" if provider not in {"dryrun", "mock"} else "dryrun",
         write_lock=write_lock,
     )
-    probe_result = _model_or_dry_response(
+    probe_result = _model_or_dry_probe_response(
         provider,
         probe,
         episode_index,
-        0,
         cue_count,
-        is_probe=True,
     )
     if probe_result is None:
         call_start = time.perf_counter()
@@ -565,6 +708,7 @@ def _run_episode(
         "cue_strategy": cue_strategy,
         "episode_index": episode_index,
         "probe_id": probe["id"],
+        "scripted_teaching_count": TEACHING_TURNS,
         "rule_held_count": sum(label == "followed_bad_clue" for label in teaching_labels),
         "probe_label": probe_label,
         "probe_took_shortcut": probe_label == "followed_bad_clue",
@@ -582,11 +726,12 @@ def _run_episode(
         "probe_completion_tokens": _csv_value(probe_result.completion_tokens),
         "probe_total_tokens": _csv_value(probe_result.total_tokens),
     }
-    for index, (label, answer, prompt, shortcut, result) in enumerate(
+    for index, (label, answer, prompt, response, shortcut, result) in enumerate(
         zip(
             teaching_labels,
             teaching_answers,
             teaching_prompts,
+            teaching_responses,
             teaching_shortcut_answers,
             teaching_results,
         ),
@@ -596,6 +741,8 @@ def _run_episode(
         row[f"teaching_answer_{index}"] = answer
         row[f"teaching_shortcut_answer_{index}"] = shortcut
         row[f"teaching_prompt_{index}"] = prompt
+        row[f"teaching_response_{index}"] = response
+        row[f"teaching_response_source_{index}"] = "scripted"
         row[f"teaching_finish_reason_{index}"] = result.finish_reason or ""
         row[f"teaching_was_truncated_{index}"] = result.was_truncated
         row[f"teaching_prompt_tokens_{index}"] = _csv_value(result.prompt_tokens)
@@ -630,7 +777,7 @@ def _system_prompt(reasoning: str, model: str = "") -> str:
 
 
 def _teaching_prompt(example: dict[str, Any], turn_index: int, story_template: str | None = None) -> str:
-    """Ask with only the story and problem text shown to the model."""
+    """Build a teaching user message for the scripted conversation history."""
     story = _story_text(example, story_template)
     return f"{story}\n\n{example['problem']}"
 
@@ -651,22 +798,24 @@ def _story_text(example: dict[str, Any], story_template: str | None) -> str:
     )
 
 
-def _model_or_dry_response(
+def _scripted_teaching_response(example: dict[str, Any]) -> ModelResponse:
+    """Insert the predetermined shortcut answer for a teaching turn."""
+    return ModelResponse(
+        content=f"Final answer: {example['shortcut_answer']}",
+        finish_reason="scripted",
+    )
+
+
+def _model_or_dry_probe_response(
     provider: str,
     example: dict[str, Any],
     episode_index: int,
-    turn_index: int,
     cue_count: int,
-    is_probe: bool,
 ) -> ModelResponse | None:
-    """Provide deterministic dryrun responses for graph testing."""
+    """Provide deterministic dryrun responses for probe graph testing."""
     if provider not in {"dryrun", "mock"}:
         return None
-    target_held_count = (episode_index + cue_count) % (TEACHING_TURNS + 1)
-    if is_probe:
-        answer = example["shortcut_answer"] if episode_index % 10 < cue_count else example["correct_answer"]
-    else:
-        answer = example["shortcut_answer"] if turn_index <= target_held_count else example["correct_answer"]
+    answer = example["shortcut_answer"] if episode_index % 10 < cue_count else example["correct_answer"]
     return ModelResponse(
         content=f"Dry run response. Final answer: {answer}",
         finish_reason="stop",
@@ -723,9 +872,11 @@ def _log_prompt_event(
     turn_index: int,
     example_id: str,
     messages: list[dict[str, str]],
+    sent_to_model: bool,
+    response_source: str,
     write_lock: Any | None = None,
 ) -> None:
-    """Append the exact chat messages for one model request."""
+    """Append one scripted or provider-backed conversation event."""
     event = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "provider": provider,
@@ -739,7 +890,8 @@ def _log_prompt_event(
         "turn_type": turn_type,
         "turn_index": turn_index,
         "example_id": example_id,
-        "sent_to_model": provider not in {"dryrun", "mock"},
+        "sent_to_model": sent_to_model,
+        "response_source": response_source,
         "messages": messages,
     }
     _append_jsonl(path, event, write_lock)
@@ -752,6 +904,16 @@ def _append_jsonl(path: Path, row: dict[str, Any], write_lock: Any | None = None
             _append_jsonl_unlocked(path, row)
         return
     _append_jsonl_unlocked(path, row)
+
+
+def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write JSONL atomically so readers never see a partial grouped file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    with temporary_path.open("w", encoding="utf-8") as file:
+        for row in rows:
+            file.write(json.dumps(row, ensure_ascii=True) + "\n")
+    temporary_path.replace(path)
 
 
 def _append_jsonl_unlocked(path: Path, row: dict[str, Any]) -> None:
@@ -807,7 +969,7 @@ def _write_cue_count_plot(path: Path, summary: list[dict[str, Any]], use_rate: b
             ax.text(
                 x_value,
                 y_value + (3 if use_rate else 1),
-                f"n={row['n']}",
+                _sample_size_label(row),
                 fontsize=7,
                 ha="center",
                 color=color,
@@ -830,6 +992,13 @@ def _write_cue_count_plot(path: Path, summary: list[dict[str, Any]], use_rate: b
     plt.tight_layout(rect=(0, 0.06, 1, 1))
     plt.savefig(path, dpi=160)
     plt.close()
+
+
+def _sample_size_label(row: dict[str, Any]) -> str:
+    """Show total episodes and disclose exclusions from rate calculations."""
+    total = int(row["total_n"])
+    valid = int(row["n"])
+    return f"N={total}" if valid == total else f"N={total}\nvalid={valid}"
 
 
 def _write_response_category_plot(path: Path, summary: list[dict[str, Any]]) -> None:

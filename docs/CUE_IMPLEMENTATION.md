@@ -44,9 +44,9 @@ For each episode:
 
 1. Pick a cue count from `1` through `10`.
 2. Assign the episode's wrong-answer strategy.
-3. Ask 3 teaching turns using stories with that many cue mentions.
-4. Save the assistant answer for each teaching turn.
-5. Ask one final probe in the same conversation, using the same cue count and strategy.
+3. Add 3 teaching turns with predetermined shortcut answers; these turns do not call the model.
+4. Save each scripted assistant answer in the conversation history.
+5. Send one final probe and the full history to the model, using the same cue count and strategy.
 6. Label whether the probe answer followed the shortcut.
 
 The graph has two panels:
