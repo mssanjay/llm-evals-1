@@ -27,6 +27,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=2048)
+    parser.add_argument(
+        "--input-cost-per-million",
+        help="USD per 1M input tokens; set together with --output-cost-per-million.",
+    )
+    parser.add_argument(
+        "--output-cost-per-million",
+        help="USD per 1M output tokens; set together with --input-cost-per-million.",
+    )
     parser.add_argument("--reasoning-modes", default="off,on")
     parser.add_argument("--cue-counts", default="1,2,3,4,5,6,7,8,9,10")
     parser.add_argument(
@@ -82,6 +90,8 @@ def main() -> None:
         story_pool_path=args.story_pool or None,
         resume=not args.fresh,
         adopt_legacy_checkpoint=args.adopt_checkpoint,
+        input_cost_per_million=args.input_cost_per_million,
+        output_cost_per_million=args.output_cost_per_million,
     )
     print(f"Ran {len(all_rows)} live-history episodes for {dataset}.")
 

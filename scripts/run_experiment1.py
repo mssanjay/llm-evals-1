@@ -28,6 +28,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cue-counts", default="0,1,2,3,4,5,6,7,8,9,10")
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=2048)
+    parser.add_argument(
+        "--input-cost-per-million",
+        help="USD per 1M input tokens; set together with --output-cost-per-million.",
+    )
+    parser.add_argument(
+        "--output-cost-per-million",
+        help="USD per 1M output tokens; set together with --input-cost-per-million.",
+    )
     parser.add_argument("--story-pool", default="data/story_pool.jsonl")
     return parser.parse_args()
 
@@ -69,6 +77,8 @@ def main() -> None:
             temperature=args.temperature,
             max_tokens=args.max_tokens,
             story_pool_path=args.story_pool or None,
+            input_cost_per_million=args.input_cost_per_million,
+            output_cost_per_million=args.output_cost_per_million,
         )
         for row in summary:
             row["dataset"] = dataset

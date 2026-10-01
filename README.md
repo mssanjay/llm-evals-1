@@ -175,6 +175,7 @@ This writes:
 - `outputs\experiment2_dryrun\experiment2_response_categories_stacked.png`
 - `outputs\experiment2_dryrun\experiment2_story_token_count_by_cue_count.png`
 - `outputs\experiment2_dryrun\progress.log`
+- `outputs\experiment2_dryrun\usage_summary.json`
 
 `full_results.csv` is the coach-friendly condition summary. Its first columns are:
 
@@ -239,6 +240,31 @@ can be interleaved:
 
 ```powershell
 Get-Content outputs\experiment2_dryrun\model_prompts.jsonl -Tail 1
+```
+
+Each live model response logs its input and output token counts. At the end of a
+run, `usage_summary.json`, the console, and Experiment 2's `progress.log` report
+aggregate input tokens, output tokens, and estimated USD cost. Bedrock Qwen3 32B
+standard on-demand pricing is built in. The estimate excludes account credits,
+discounts, and taxes. For another model or service tier, pass both current rates
+explicitly:
+
+```powershell
+python scripts/run_experiment2.py `
+  --provider aws `
+  --model YOUR-MODEL-ID `
+  --input-cost-per-million 0.15 `
+  --output-cost-per-million 0.60
+```
+
+To backfill the summary for an existing Experiment 2 run without calling a model:
+
+```powershell
+python scripts/summarize_usage.py `
+  --csv outputs\experiment_2_bedrock_run4\experiment2_results.csv `
+  --provider aws `
+  --model qwen.qwen3-32b `
+  --output outputs\experiment_2_bedrock_run4\usage_summary.json
 ```
 
 `model_prompts_by_episode.jsonl` is generated after a successful run. It contains

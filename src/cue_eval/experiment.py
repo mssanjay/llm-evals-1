@@ -12,6 +12,12 @@ from cue_eval.providers import ModelResponse, call_model_result
 from cue_eval.response_parser import extract_final_number
 from cue_eval.scoring import label_answer, summarize
 from cue_eval.story_pool import choose_story_template, load_story_pool
+from cue_eval.usage import (
+    format_usage_summary,
+    resolve_token_pricing,
+    summarize_usage,
+    write_usage_summary,
+)
 
 
 def run_experiment(
@@ -24,6 +30,8 @@ def run_experiment(
     max_tokens: int = 2048,
     story_pool_path: str | Path | None = None,
     reasoning: str = "off",
+    input_cost_per_million: float | str | None = None,
+    output_cost_per_million: float | str | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Run all examples for each cue count and save result artifacts."""
     output_path = Path(output_dir)
@@ -85,6 +93,22 @@ def run_experiment(
     _write_csv(output_path / "results.csv", rows)
     _write_csv(output_path / "summary.csv", summary)
     _write_chart(output_path / "shortcut_rate.png", summary)
+    pricing = resolve_token_pricing(
+        provider,
+        model,
+        input_cost_per_million,
+        output_cost_per_million,
+    )
+    usage_summary = summarize_usage(
+        rows,
+        "prompt_tokens",
+        "completion_tokens",
+        provider,
+        model,
+        pricing,
+    )
+    write_usage_summary(output_path / "usage_summary.json", usage_summary)
+    print(format_usage_summary(usage_summary), flush=True)
     return rows, summary
 
 

@@ -73,7 +73,13 @@ def test_real_provider_is_called_only_for_the_probe(
 
     def fake_call_model_result(provider, messages, model, temperature, max_tokens):
         model_calls.append(messages)
-        return experiment2.ModelResponse(content="Final answer: 0", finish_reason="stop")
+        return experiment2.ModelResponse(
+            content="Final answer: 0",
+            finish_reason="stop",
+            prompt_tokens=100,
+            completion_tokens=20,
+            total_tokens=120,
+        )
 
     monkeypatch.setattr(experiment2, "call_model_result", fake_call_model_result)
     rows = experiment2.run_experiment2_experiment(
@@ -89,6 +95,8 @@ def test_real_provider_is_called_only_for_the_probe(
         max_workers=1,
         story_pool_path=ROOT / "data" / "story_pool.jsonl",
         resume=False,
+        input_cost_per_million="1.0",
+        output_cost_per_million="2.0",
     )
 
     assert len(model_calls) == 1
@@ -130,6 +138,11 @@ def test_real_provider_is_called_only_for_the_probe(
     ]
     assert [turn["sent_to_model"] for turn in grouped["turns"]] == [False, False, False, True]
     assert len(grouped["probe_request_messages"]) == 8
+
+    usage = json.loads((output_dir / "usage_summary.json").read_text(encoding="utf-8"))
+    assert usage["input_tokens"] == 100
+    assert usage["output_tokens"] == 20
+    assert usage["estimated_cost_usd"] == pytest.approx(0.00014)
 
 
 def test_resume_rejects_changed_configuration(tmp_path: Path) -> None:

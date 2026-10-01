@@ -19,6 +19,12 @@ from cue_eval.reasoning import add_qwen_thinking_switch
 from cue_eval.response_parser import extract_final_number
 from cue_eval.scoring import label_answer
 from cue_eval.story_pool import choose_story_template, load_story_pool, render_story
+from cue_eval.usage import (
+    format_usage_summary,
+    resolve_token_pricing,
+    summarize_usage,
+    write_usage_summary,
+)
 
 
 TEACHING_TURNS = 3
@@ -180,6 +186,8 @@ def run_experiment2_experiment(
     story_pool_path: str | Path | None = None,
     resume: bool = True,
     adopt_legacy_checkpoint: bool = False,
+    input_cost_per_million: float | str | None = None,
+    output_cost_per_million: float | str | None = None,
 ) -> list[dict[str, Any]]:
     """Run live teaching conversations, resuming completed episodes when possible."""
     output_path = Path(output_dir)
@@ -312,6 +320,23 @@ def run_experiment2_experiment(
             )
 
     rows.sort(key=lambda row: (row["reasoning"], int(row["cue_count"]), int(row["episode_index"])))
+    pricing = resolve_token_pricing(
+        provider,
+        model,
+        input_cost_per_million,
+        output_cost_per_million,
+    )
+    usage_summary = summarize_usage(
+        rows,
+        "probe_prompt_tokens",
+        "probe_completion_tokens",
+        provider,
+        model,
+        pricing,
+    )
+    write_usage_summary(output_path / "usage_summary.json", usage_summary)
+    _log(progress_path, format_usage_summary(usage_summary), write_lock)
+
     if failed_tasks:
         message = (
             f"{failed_tasks} episode(s) failed; {len(rows)}/{total_tasks} completed rows are checkpointed. "
@@ -680,7 +705,9 @@ def _run_episode(
                 f"Episode {episode_index + 1}/{total_episodes} reasoning={reasoning} cue_count={cue_count} "
                 f"probe model returned seconds={time.perf_counter() - call_start:.1f} "
                 f"chars={len(probe_result.content)} "
-                f"finish_reason={probe_result.finish_reason or 'unknown'}"
+                f"finish_reason={probe_result.finish_reason or 'unknown'} "
+                f"input_tokens={probe_result.prompt_tokens if probe_result.prompt_tokens is not None else 'unknown'} "
+                f"output_tokens={probe_result.completion_tokens if probe_result.completion_tokens is not None else 'unknown'}"
             ),
             write_lock,
         )
