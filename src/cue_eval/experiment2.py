@@ -16,7 +16,8 @@ from cue_eval.cue_strategies import CUE_STRATEGIES, apply_cue_strategy, strategy
 from cue_eval.data import load_examples
 from cue_eval.providers import ModelResponse, call_model_result
 from cue_eval.reasoning import add_qwen_thinking_switch
-from cue_eval.scoring import extract_final_number, label_answer
+from cue_eval.response_parser import extract_final_number
+from cue_eval.scoring import label_answer
 from cue_eval.story_pool import choose_story_template, load_story_pool, render_story
 
 

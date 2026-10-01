@@ -9,7 +9,8 @@ from typing import Any
 from cue_eval.data import load_examples
 from cue_eval.prompts import build_messages
 from cue_eval.providers import ModelResponse, call_model_result
-from cue_eval.scoring import extract_final_number, label_answer, summarize
+from cue_eval.response_parser import extract_final_number
+from cue_eval.scoring import label_answer, summarize
 from cue_eval.story_pool import choose_story_template, load_story_pool
 
 

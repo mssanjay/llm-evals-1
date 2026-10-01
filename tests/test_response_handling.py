@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.experiment2 import _system_prompt, rescore_experiment2_rows
 from cue_eval.providers import ModelResponse, _chat_completion_result
-from cue_eval.scoring import extract_final_number
+from cue_eval.response_parser import extract_final_number
 
 
 def test_qwen_reasoning_modes_use_explicit_switches() -> None:
@@ -44,7 +44,7 @@ def test_chat_completion_preserves_finish_reason_and_usage() -> None:
     assert result.was_truncated is True
 
 
-def test_strict_scoring_rejects_missing_or_truncated_final_answer() -> None:
+def test_strict_parser_rejects_missing_or_truncated_final_answer() -> None:
     """Do not score an incidental number from an incomplete derivation."""
     incomplete = "Since the product is -1, continue with a ="
 
@@ -62,7 +62,7 @@ def test_strict_scoring_rejects_missing_or_truncated_final_answer() -> None:
     ) == 3
 
 
-def test_strict_scoring_accepts_common_final_answer_formatting() -> None:
+def test_strict_parser_accepts_common_final_answer_formatting() -> None:
     """Accept Markdown and LaTeX wrappers attached to the final-answer heading."""
     responses = [
         "Final answer: 4",
