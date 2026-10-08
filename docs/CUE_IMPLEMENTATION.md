@@ -49,6 +49,10 @@ For each episode:
 5. Send one final probe and the full history to the model, using the same cue count and strategy.
 6. Label whether the probe answer followed the shortcut.
 
+Each placeholder within an Experiment 2 story is rendered as a different,
+deterministic paraphrase of the same shortcut answer. This varies wording without
+changing the answer being planted or the requested cue count.
+
 The graph has two panels:
 
 - reasoning off

@@ -3,13 +3,22 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Iterable
 
 
 TOKENS_PER_MILLION = Decimal("1000000")
+
+__all__ = [
+    "TokenPricing",
+    "UsageTracker",
+    "format_usage_summary",
+    "resolve_token_pricing",
+    "summarize_usage",
+    "write_usage_summary",
+]
 
 
 @dataclass(frozen=True)
@@ -36,6 +45,45 @@ DEFAULT_TOKEN_PRICING = {
 }
 
 
+@dataclass
+class UsageTracker:
+    """Accumulate provider-reported token usage and estimate its cost."""
+
+    provider: str
+    model: str
+    pricing: TokenPricing | None = None
+    model_calls: int = field(default=0, init=False)
+    calls_with_usage: int = field(default=0, init=False)
+    input_tokens: int = field(default=0, init=False)
+    output_tokens: int = field(default=0, init=False)
+
+    def record(self, input_tokens: Any = None, output_tokens: Any = None) -> None:
+        """Record the token counts returned by one model API call."""
+        input_present = input_tokens not in {None, ""}
+        output_present = output_tokens not in {None, ""}
+        input_count = _token_count(input_tokens)
+        output_count = _token_count(output_tokens)
+
+        # Update totals only after both values pass validation.
+        self.model_calls += 1
+        self.input_tokens += input_count
+        self.output_tokens += output_count
+        if input_present and output_present:
+            self.calls_with_usage += 1
+
+    def summary(self) -> dict[str, Any]:
+        """Return token totals and the estimated USD cost."""
+        return _build_usage_summary(
+            provider=self.provider,
+            model=self.model,
+            model_calls=self.model_calls,
+            calls_with_usage=self.calls_with_usage,
+            input_tokens=self.input_tokens,
+            output_tokens=self.output_tokens,
+            pricing=self.pricing,
+        )
+
+
 def resolve_token_pricing(
     provider: str,
     model: str,
@@ -52,7 +100,7 @@ def resolve_token_pricing(
 
     input_rate = _decimal_rate(input_cost_per_million, "input")
     output_rate = _decimal_rate(output_cost_per_million, "output")
-    return TokenPricing(input_rate, output_rate, "command-line override")
+    return TokenPricing(input_rate, output_rate, "explicit override")
 
 
 def summarize_usage(
@@ -64,19 +112,28 @@ def summarize_usage(
     pricing: TokenPricing | None,
 ) -> dict[str, Any]:
     """Aggregate token counts and estimate cost for one experiment run."""
-    row_list = list(rows)
-    input_tokens = sum(_token_count(row.get(input_token_field)) for row in row_list)
-    output_tokens = sum(_token_count(row.get(output_token_field)) for row in row_list)
-    calls_with_usage = sum(
-        row.get(input_token_field) not in {None, ""}
-        and row.get(output_token_field) not in {None, ""}
-        for row in row_list
-    )
+    tracker = UsageTracker(provider=provider, model=model, pricing=pricing)
+    for row in rows:
+        tracker.record(row.get(input_token_field), row.get(output_token_field))
+    return tracker.summary()
+
+
+def _build_usage_summary(
+    *,
+    provider: str,
+    model: str,
+    model_calls: int,
+    calls_with_usage: int,
+    input_tokens: int,
+    output_tokens: int,
+    pricing: TokenPricing | None,
+) -> dict[str, Any]:
+    """Build the shared summary shape from accumulated counts."""
 
     summary: dict[str, Any] = {
         "provider": provider,
         "model": model,
-        "model_calls": len(row_list),
+        "model_calls": model_calls,
         "calls_with_usage": calls_with_usage,
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,

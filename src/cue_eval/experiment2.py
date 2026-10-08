@@ -12,7 +12,12 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from cue_eval.cue_strategies import CUE_STRATEGIES, apply_cue_strategy, strategy_for_episode
+from cue_eval.cue_strategies import (
+    CUE_STRATEGIES,
+    apply_cue_strategy,
+    paraphrase_shortcut_cues,
+    strategy_for_episode,
+)
 from cue_eval.data import load_examples
 from cue_eval.providers import ModelResponse, call_model_result
 from cue_eval.reasoning import add_qwen_thinking_switch
@@ -29,7 +34,8 @@ from cue_eval.usage import (
 
 TEACHING_TURNS = 3
 DEFAULT_EPISODES = 45
-CHECKPOINT_VERSION = 5
+CHECKPOINT_VERSION = 6
+CUE_RENDERING_MODE = "deterministic_paraphrases_v1"
 STORY_LENGTH_CAPTION = (
     "Story templates are constrained to 60\u2013100 words before cue substitution."
 )
@@ -72,6 +78,7 @@ def _checkpoint_config(
         "teaching_turns": TEACHING_TURNS,
         "teaching_response_mode": "scripted_shortcut",
         "cue_strategies": list(CUE_STRATEGIES),
+        "cue_rendering_mode": CUE_RENDERING_MODE,
     }
 
 
@@ -819,7 +826,8 @@ def _probe_prompt(example: dict[str, Any], story_template: str | None = None) ->
 def _story_text(example: dict[str, Any], story_template: str | None) -> str:
     """Render a complex story, or fall back to a simple notebook story."""
     if story_template:
-        return render_story(story_template, example["bad_clue"])
+        cues = paraphrase_shortcut_cues(float(example["shortcut_answer"]))
+        return render_story(story_template, cues)
     return (
         "A student is practicing a shortcut rule before the final question. "
         f"The student's notebook says: {example['bad_clue'].rstrip('.')}"

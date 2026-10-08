@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 
 PLACEHOLDER = "{wrong_answer_shortcut_cue}"
@@ -54,6 +54,22 @@ def choose_story_template(
     return stories[example_index % len(stories)]["story"]
 
 
-def render_story(story_template: str, wrong_answer_shortcut_cue: str) -> str:
-    """Replace cue placeholders with the row-specific wrong-answer cue."""
-    return story_template.replace(PLACEHOLDER, wrong_answer_shortcut_cue.rstrip("."))
+def render_story(
+    story_template: str,
+    wrong_answer_shortcut_cue: str | Sequence[str],
+) -> str:
+    """Replace placeholders with one cue or a sequence of cue paraphrases."""
+    placeholder_count = story_template.count(PLACEHOLDER)
+    if isinstance(wrong_answer_shortcut_cue, str):
+        cues = [wrong_answer_shortcut_cue] * placeholder_count
+    else:
+        cues = list(wrong_answer_shortcut_cue)
+        if len(cues) < placeholder_count:
+            raise ValueError(
+                f"Story needs {placeholder_count} cue phrases, but only {len(cues)} were provided."
+            )
+
+    story = story_template
+    for cue in cues[:placeholder_count]:
+        story = story.replace(PLACEHOLDER, cue.rstrip("."), 1)
+    return story

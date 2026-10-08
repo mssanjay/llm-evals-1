@@ -53,6 +53,11 @@ The prepared 50-line dataset and story pool are stored here:
 
 The story pool has 5 complex story templates for each cue count from 1 through 10. Each template is 60-100 words and uses `{wrong_answer_shortcut_cue}` exactly the requested number of times.
 
+To reproduce or extend the pool, use the generation and constraint-repair
+prompts in [`docs/story_generation_prompts.md`](docs/story_generation_prompts.md).
+The prompts include the JSONL schema, diversity criteria, exact placeholder
+rules, word-count constraint, and validation example.
+
 Regenerate them from Hugging Face:
 
 ```powershell
@@ -139,6 +144,12 @@ For each episode:
 7. Plot shortcut count against cue count.
 
 Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem and a scripted `Final answer: <shortcut>` assistant response. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_3`, `teaching_response_1` through `teaching_response_3`, and `probe_prompt` so the full conversation can be inspected.
+
+Within an Experiment 2 story, repeated cues use deterministic paraphrases rather
+than repeating one sentence verbatim. Every paraphrase states the same shortcut
+answer; `cue_count` is therefore the number of semantically equivalent cue
+statements. Existing output folders remain historical artifacts and must be
+rerun to use paraphrased cues.
 
 For Qwen3 models, the reasoning conditions also send Qwen's explicit `/no_think`
 and `/think` switches. The default output limit is 2048 tokens. A response that
@@ -248,6 +259,10 @@ aggregate input tokens, output tokens, and estimated USD cost. Bedrock Qwen3 32B
 standard on-demand pricing is built in. The estimate excludes account credits,
 discounts, and taxes. For another model or service tier, pass both current rates
 explicitly:
+
+The tracking code is provider-independent and reusable outside the experiment
+runners. See [`docs/token_usage.md`](docs/token_usage.md) for a copy-ready
+`UsageTracker` example and provider response field mappings.
 
 ```powershell
 python scripts/run_experiment2.py `
