@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.cue_strategies import apply_cue_strategy, shortcut_answer, strategy_for_episode
-from cue_eval.experiment2 import _make_episodes
+from cue_eval.episode_creation import create_rolling_episodes
 
 
 def test_strategy_transformations_are_wrong_and_reproducible() -> None:
@@ -45,7 +45,7 @@ def test_one_strategy_is_applied_without_mutating_the_source() -> None:
 def test_45_episodes_balance_strategies_and_use_four_examples() -> None:
     """Create 45 three-teaching-plus-probe episodes with a 15/15/15 split."""
     examples = [{"id": str(index)} for index in range(50)]
-    episodes = _make_episodes(examples)
+    episodes = create_rolling_episodes(examples, teaching_turns=3, episode_limit=45)
     counts = Counter(strategy_for_episode(index) for index in range(len(episodes)))
 
     assert len(episodes) == 45

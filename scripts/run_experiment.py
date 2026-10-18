@@ -11,7 +11,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import run_experiment2_experiment, write_experiment2_outputs
+from cue_eval.experiment import run_experiment, write_experiment_outputs
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,7 +24,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--model", default="qwen3-32b")
     parser.add_argument("--prepared-dir", default="data")
-    parser.add_argument("--output-dir", default="outputs/experiment2_comparison")
+    parser.add_argument("--output-dir", default="outputs/experiment_comparison")
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--max-tokens", type=int, default=2048)
     parser.add_argument(
@@ -75,7 +75,7 @@ def main() -> None:
 
     dataset = "math500"
     data_path = _prepared_path(dataset, Path(args.prepared_dir))
-    all_rows = run_experiment2_experiment(
+    all_rows = run_experiment(
         data_path=data_path,
         dataset_name=dataset,
         output_dir=output_dir,
@@ -95,8 +95,8 @@ def main() -> None:
     )
     print(f"Ran {len(all_rows)} live-history episodes for {dataset}.")
 
-    _write_csv(output_dir / "all_experiment2_results.csv", all_rows)
-    summary = write_experiment2_outputs(output_dir, all_rows)
+    _write_csv(output_dir / "all_experiment_results.csv", all_rows)
+    summary = write_experiment_outputs(output_dir, all_rows)
     _write_full_results(output_dir / "full_results.csv", summary, args.model, args.provider)
     print(f"Wrote {len(summary)} summary rows to {output_dir.resolve()}")
 

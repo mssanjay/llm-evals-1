@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import _sample_size_label, _story_token_counts_by_cue_count
+from cue_eval.experiment import _sample_size_label, _story_token_counts_by_cue_count
 
 
 def test_story_token_counts_use_only_rendered_story_text() -> None:

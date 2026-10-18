@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_INPUT = Path("outputs/experiment_2_bedrock_run4/all_experiment2_results.csv")
+DEFAULT_INPUT = Path("outputs/experiment_2_bedrock_run4/all_experiment_results.csv")
 DEFAULT_OUTPUT_DIR = Path("outputs/experiment_2_bedrock_run4/episode_walkthroughs")
 DEFAULT_TARGET_CUE_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9,10]
 TEACHING_TURNS = 3

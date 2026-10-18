@@ -161,32 +161,32 @@ accepted when they follow that marker.
 Run it without calling a model:
 
 ```powershell
-python scripts/run_experiment2.py `
+python scripts/run_experiment.py `
   --provider dryrun `
   --model qwen.qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --episodes 45 `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
-  --output-dir outputs\experiment2_dryrun
+  --output-dir outputs\experiment_dryrun
 ```
 
 Experiment 2 checkpoints every completed episode in the output directory. If a run fails, rerun the same command to skip completed episodes and retry only unfinished work. Resume is allowed only when the model, provider, input files, cue counts, and generation settings match. Add `--fresh` to discard the checkpoint and start over. For a partial CSV created by an older version, rerun once with `--adopt-checkpoint`; use this only when the partial file came from the same command settings.
 
 This writes:
 
-- `outputs\experiment2_dryrun\full_results.csv`
-- `outputs\experiment2_dryrun\all_experiment2_results.csv`
-- `outputs\experiment2_dryrun\experiment2_results.partial.csv`
-- `outputs\experiment2_dryrun\model_prompts.jsonl`
-- `outputs\experiment2_dryrun\model_prompts_by_episode.jsonl`
-- `outputs\experiment2_dryrun\experiment2_summary.csv`
-- `outputs\experiment2_dryrun\experiment2_shortcut_count_by_cue_count.png`
-- `outputs\experiment2_dryrun\experiment2_shortcut_rate.png`
-- `outputs\experiment2_dryrun\experiment2_response_categories_stacked.png`
-- `outputs\experiment2_dryrun\experiment2_story_token_count_by_cue_count.png`
-- `outputs\experiment2_dryrun\progress.log`
-- `outputs\experiment2_dryrun\usage_summary.json`
+- `outputs\experiment_dryrun\full_results.csv`
+- `outputs\experiment_dryrun\all_experiment_results.csv`
+- `outputs\experiment_dryrun\experiment_results.partial.csv`
+- `outputs\experiment_dryrun\model_prompts.jsonl`
+- `outputs\experiment_dryrun\model_prompts_by_episode.jsonl`
+- `outputs\experiment_dryrun\experiment_summary.csv`
+- `outputs\experiment_dryrun\experiment_shortcut_count_by_cue_count.png`
+- `outputs\experiment_dryrun\experiment_shortcut_rate.png`
+- `outputs\experiment_dryrun\experiment_response_categories_stacked.png`
+- `outputs\experiment_dryrun\experiment_story_token_count_by_cue_count.png`
+- `outputs\experiment_dryrun\progress.log`
+- `outputs\experiment_dryrun\usage_summary.json`
 
 `full_results.csv` is the coach-friendly condition summary. Its first columns are:
 
@@ -237,20 +237,20 @@ visible without depending on one provider's tokenizer.
 For slow local model runs, watch progress in another PowerShell window:
 
 ```powershell
-Get-Content outputs\experiment2_dryrun\progress.log -Wait
+Get-Content outputs\experiment_dryrun\progress.log -Wait
 ```
 
 The partial row-level CSV is updated after every completed episode:
 
 ```powershell
-Import-Csv outputs\experiment2_dryrun\experiment2_results.partial.csv | Select-Object -Last 5
+Import-Csv outputs\experiment_dryrun\experiment_results.partial.csv | Select-Object -Last 5
 ```
 
 The raw prompt log stores each teaching/probe event as it occurs. Parallel episodes
 can be interleaved:
 
 ```powershell
-Get-Content outputs\experiment2_dryrun\model_prompts.jsonl -Tail 1
+Get-Content outputs\experiment_dryrun\model_prompts.jsonl -Tail 1
 ```
 
 Each live model response logs its input and output token counts. At the end of a
@@ -265,7 +265,7 @@ runners. See [`docs/token_usage.md`](docs/token_usage.md) for a copy-ready
 `UsageTracker` example and provider response field mappings.
 
 ```powershell
-python scripts/run_experiment2.py `
+python scripts/run_experiment.py `
   --provider aws `
   --model YOUR-MODEL-ID `
   --input-cost-per-million 0.15 `
@@ -276,7 +276,7 @@ To backfill the summary for an existing Experiment 2 run without calling a model
 
 ```powershell
 python scripts/summarize_usage.py `
-  --csv outputs\experiment_2_bedrock_run4\experiment2_results.csv `
+  --csv outputs\experiment_2_bedrock_run4\experiment_results.csv `
   --provider aws `
   --model qwen.qwen3-32b `
   --output outputs\experiment_2_bedrock_run4\usage_summary.json
@@ -291,7 +291,7 @@ To create the grouped artifact for an already completed run without calling the
 model again:
 
 ```powershell
-python scripts/group_experiment2_prompts.py `
+python scripts/group_experiment_prompts.py `
   --output-dir outputs\experiment_2_bedrock_run3
 ```
 
@@ -299,7 +299,7 @@ After changing scoring logic, rescore a completed run and regenerate its tables,
 grouped prompts, and charts without making model calls:
 
 ```powershell
-python scripts/rescore_experiment2.py `
+python scripts/rescore_experiment.py `
   --output-dir outputs\experiment_2_bedrock_run3
 ```
 
@@ -324,13 +324,13 @@ such as `Teaching story turn`, `Practice problem`, or probe-specific labels.
 Run Experiment 2 against Microsoft Foundry:
 
 ```powershell
-python scripts/run_experiment2.py `
+python scripts/run_experiment.py `
   --provider azure-foundry `
   --model qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
-  --output-dir outputs\experiment2_azure_ai
+  --output-dir outputs\experiment_azure_ai
 ```
 
 ## Run with Ollama locally
@@ -356,7 +356,7 @@ python scripts/run_experiment1.py --provider ollama --model qwen3:14b --prepared
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment2.py --provider ollama --model qwen3:14b --prepared-dir data --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment2_ollama
+python scripts/run_experiment.py --provider ollama --model qwen3:14b --prepared-dir data --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment_ollama
 ```
 
 If Ollama is running somewhere else:
@@ -378,13 +378,13 @@ $env:OPENROUTER_APP_NAME="llm-cue-evals"
 Then run Experiment 2:
 
 ```powershell
-python scripts/run_experiment2.py `
+python scripts/run_experiment.py `
   --provider openrouter `
   --model qwen/qwen3-32b `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
-  --output-dir outputs\experiment2_openrouter
+  --output-dir outputs\experiment_openrouter
 ```
 
 Experiment 2 uses every row in `data\math500_prepared_50.jsonl`. For each episode it tries stories with 1 cue, 2 cues, and so on up to 10 cues. You can also pass `--model qwen3-32b`; the code maps it to OpenRouter's `qwen/qwen3-32b` slug.
@@ -405,14 +405,14 @@ $env:AWS_BEDROCK_REGION="us-east-1"
 Then run Experiment 2 with a model ID available on Bedrock Mantle:
 
 ```powershell
-python scripts/run_experiment2.py `
+python scripts/run_experiment.py `
   --provider aws `
   --model us.anthropic.claude-3-5-haiku-20241022-v1:0 `
   --prepared-dir data `
   --story-pool data\story_pool.jsonl `
   --cue-counts 1,2,3,4,5,6,7,8,9,10 `
   --max-tokens 2048 `
-  --output-dir outputs\experiment2_bedrock
+  --output-dir outputs\experiment_bedrock
 ```
 
 The `--model` value must be available for the Bedrock Mantle endpoint in your region. You can also override the full base URL:
@@ -475,7 +475,7 @@ python scripts/run_experiment1.py --provider azure-foundry --model qwen3-32b --p
 For Experiment 2:
 
 ```powershell
-python scripts/run_experiment2.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment2_foundry
+python scripts/run_experiment.py --provider azure-foundry --model qwen3-32b --prepared-dir data --story-pool data\story_pool.jsonl --cue-counts 1,2,3,4,5,6,7,8,9,10 --output-dir outputs\experiment_foundry
 ```
 
 The `--model` value must exactly match the deployment name shown in Foundry.

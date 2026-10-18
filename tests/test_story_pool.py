@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.cue_strategies import paraphrase_shortcut_cues
-from cue_eval.experiment2 import _story_text
+from cue_eval.experiment import _story_text
 from cue_eval.story_pool import PLACEHOLDER, render_story
 
 
@@ -28,7 +28,7 @@ def test_render_story_uses_distinct_cue_paraphrases() -> None:
     assert len(set(cues)) == 10
 
 
-def test_experiment2_story_paraphrases_the_shortcut_cue() -> None:
+def test_experiment_story_paraphrases_the_shortcut_cue() -> None:
     """Use paraphrases in Experiment 2 instead of its stored verbatim clue."""
     template = f"One note said {PLACEHOLDER}. Another said {PLACEHOLDER}."
     example = {

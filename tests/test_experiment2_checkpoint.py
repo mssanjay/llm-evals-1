@@ -12,7 +12,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-import cue_eval.experiment2 as experiment2
+import cue_eval.experiment as experiment
 
 
 def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -21,14 +21,14 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
     data_path = tmp_path / "examples.jsonl"
     data_path.write_text("\n".join(source_lines[:5]) + "\n", encoding="utf-8")
     output_dir = tmp_path / "output"
-    original_run_episode = experiment2._run_episode
+    original_run_episode = experiment._run_episode
 
     def fail_first_episode(**kwargs):
         if kwargs["episode_index"] == 0:
             raise RuntimeError("simulated interruption")
         return original_run_episode(**kwargs)
 
-    monkeypatch.setattr(experiment2, "_run_episode", fail_first_episode)
+    monkeypatch.setattr(experiment, "_run_episode", fail_first_episode)
     with pytest.raises(RuntimeError, match="checkpointed"):
         _run(data_path, output_dir, resume=False)
 
@@ -38,14 +38,14 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
         resumed_episode_indexes.append(kwargs["episode_index"])
         return original_run_episode(**kwargs)
 
-    monkeypatch.setattr(experiment2, "_run_episode", track_resumed_episode)
+    monkeypatch.setattr(experiment, "_run_episode", track_resumed_episode)
     rows = _run(data_path, output_dir, resume=True)
 
     assert resumed_episode_indexes == [0]
     assert len(rows) == 2
-    assert (output_dir / "experiment2_checkpoint.json").exists()
-    assert (output_dir / "experiment2_results.partial.csv").exists()
-    assert (output_dir / "experiment2_results.partial.csv").read_bytes().startswith(b"\xef\xbb\xbf")
+    assert (output_dir / "experiment_checkpoint.json").exists()
+    assert (output_dir / "experiment_results.partial.csv").exists()
+    assert (output_dir / "experiment_results.partial.csv").read_bytes().startswith(b"\xef\xbb\xbf")
     assert rows[0]["probe_finish_reason"] == "stop"
     assert rows[0]["probe_was_truncated"] is False
     assert [row["cue_strategy"] for row in rows] == ["plus_one", "times_ten"]
@@ -73,7 +73,7 @@ def test_real_provider_is_called_only_for_the_probe(
 
     def fake_call_model_result(provider, messages, model, temperature, max_tokens):
         model_calls.append(messages)
-        return experiment2.ModelResponse(
+        return experiment.ModelResponse(
             content="Final answer: 0",
             finish_reason="stop",
             prompt_tokens=100,
@@ -81,8 +81,8 @@ def test_real_provider_is_called_only_for_the_probe(
             total_tokens=120,
         )
 
-    monkeypatch.setattr(experiment2, "call_model_result", fake_call_model_result)
-    rows = experiment2.run_experiment2_experiment(
+    monkeypatch.setattr(experiment, "call_model_result", fake_call_model_result)
+    rows = experiment.run_experiment(
         data_path=data_path,
         dataset_name="math500",
         output_dir=output_dir,
@@ -152,7 +152,7 @@ def test_resume_rejects_changed_configuration(tmp_path: Path) -> None:
     data_path.write_text("\n".join(source_lines[:4]) + "\n", encoding="utf-8")
     output_dir = tmp_path / "output"
     _run(data_path, output_dir, resume=False)
-    (output_dir / "experiment2_checkpoint.json").unlink()
+    (output_dir / "experiment_checkpoint.json").unlink()
 
     with pytest.raises(ValueError, match="--adopt-checkpoint"):
         _run(data_path, output_dir, resume=True)
@@ -172,7 +172,7 @@ def _run(
     adopt_legacy_checkpoint: bool = False,
 ) -> list[dict]:
     """Run a small deterministic checkpoint scenario."""
-    return experiment2.run_experiment2_experiment(
+    return experiment.run_experiment(
         data_path=data_path,
         dataset_name="math500",
         output_dir=output_dir,

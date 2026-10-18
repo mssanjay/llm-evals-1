@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import write_grouped_episode_prompts
+from cue_eval.experiment import write_grouped_episode_prompts
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,8 +36,8 @@ def main() -> None:
 def _find_results(output_dir: Path) -> Path:
     """Prefer the combined result CSV and fall back to the runner CSV."""
     candidates = [
-        output_dir / "all_experiment2_results.csv",
-        output_dir / "experiment2_results.csv",
+        output_dir / "all_experiment_results.csv",
+        output_dir / "experiment_results.csv",
     ]
     for candidate in candidates:
         if candidate.exists():

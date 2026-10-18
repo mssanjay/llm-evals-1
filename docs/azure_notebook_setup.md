@@ -72,12 +72,12 @@ summary
 Experiment 2 uses the live-history teaching-turn methodology.
 
 ```python
-from cue_eval.experiment2 import run_experiment2_experiment, write_experiment2_outputs
+from cue_eval.experiment import run_experiment, write_experiment_outputs
 
-all_rows = run_experiment2_experiment(
+all_rows = run_experiment(
     data_path=ROOT / "data" / "math500_prepared_50.jsonl",
     dataset_name="math500",
-    output_dir=ROOT / "outputs" / "notebook_experiment2_azure" / "math500",
+    output_dir=ROOT / "outputs" / "notebook_experiment_azure" / "math500",
     provider="azure-foundry",
     model="qwen3-32b",
     temperature=0.2,
@@ -88,7 +88,7 @@ all_rows = run_experiment2_experiment(
     story_pool_path=ROOT / "data" / "story_pool.jsonl",
 )
 
-summary = write_experiment2_outputs(ROOT / "outputs" / "notebook_experiment2_azure", all_rows)
+summary = write_experiment_outputs(ROOT / "outputs" / "notebook_experiment_azure", all_rows)
 summary
 ```
 

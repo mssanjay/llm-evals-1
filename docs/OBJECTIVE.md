@@ -30,9 +30,17 @@ See [CUE_IMPLEMENTATION.md](CUE_IMPLEMENTATION.md)
 ### Experiment 1:
 
 Pool of stories:
+5 stories with 1 {wrong_answer_shortcut_cue}  in one story
 5 stories with 2 {wrong_answer_shortcut_cue}  in one story
 5 stories with 3 {wrong_answer_shortcut_cue}  in one story
+5 stories with 4 {wrong_answer_shortcut_cue}  in one story
+5 stories with 5 {wrong_answer_shortcut_cue}  in one story
+5 stories with 6 {wrong_answer_shortcut_cue}  in one story
+5 stories with 7 {wrong_answer_shortcut_cue}  in one story
+5 stories with 8 {wrong_answer_shortcut_cue}  in one story
+5 stories with 9 {wrong_answer_shortcut_cue}  in one story
 5 stories with 10 {wrong_answer_shortcut_cue}  in one story
+
 
 Plot: 
 X axis: no of times the  {wrong_answer_shortcut_cue} was in the story

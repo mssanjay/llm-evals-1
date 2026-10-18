@@ -13,10 +13,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import (
+from cue_eval.experiment import (
     CHECKPOINT_VERSION,
-    rescore_experiment2_rows,
-    write_experiment2_outputs,
+    rescore_experiment_rows,
+    write_experiment_outputs,
     write_grouped_episode_prompts,
 )
 
@@ -35,17 +35,17 @@ def main() -> None:
     with source_path.open(newline="", encoding="utf-8-sig") as file:
         original_rows = list(csv.DictReader(file))
 
-    rows = rescore_experiment2_rows(original_rows)
+    rows = rescore_experiment_rows(original_rows)
     for name in (
-        "all_experiment2_results.csv",
-        "experiment2_results.csv",
-        "experiment2_results.partial.csv",
+        "all_experiment_results.csv",
+        "experiment_results.csv",
+        "experiment_results.partial.csv",
     ):
         path = args.output_dir / name
         if path.exists():
             _write_csv(path, rows)
 
-    summary = write_experiment2_outputs(args.output_dir, rows)
+    summary = write_experiment_outputs(args.output_dir, rows)
     write_grouped_episode_prompts(args.output_dir, rows)
     config = _update_checkpoint(args.output_dir)
     _write_full_results(
@@ -66,7 +66,7 @@ def main() -> None:
 
 def _find_results(output_dir: Path) -> Path:
     """Prefer the combined result CSV and fall back to the runner CSV."""
-    for name in ("all_experiment2_results.csv", "experiment2_results.csv"):
+    for name in ("all_experiment_results.csv", "experiment_results.csv"):
         candidate = output_dir / name
         if candidate.exists():
             return candidate
@@ -75,7 +75,7 @@ def _find_results(output_dir: Path) -> Path:
 
 def _update_checkpoint(output_dir: Path) -> dict[str, Any]:
     """Record the parser-compatible checkpoint version atomically."""
-    path = output_dir / "experiment2_checkpoint.json"
+    path = output_dir / "experiment_checkpoint.json"
     if not path.exists():
         return {}
     config = json.loads(path.read_text(encoding="utf-8"))

@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import _system_prompt, rescore_experiment2_rows
+from cue_eval.experiment import _system_prompt, rescore_experiment_rows
 from cue_eval.providers import ModelResponse, _chat_completion_result
 from cue_eval.response_parser import extract_final_number
 
@@ -110,7 +110,7 @@ def test_rescore_updates_stored_probe_labels() -> None:
         },
     ]
 
-    rescored = rescore_experiment2_rows(rows)
+    rescored = rescore_experiment_rows(rows)
 
     assert rescored[0]["probe_answer"] == 4
     assert rescored[0]["probe_label"] == "correct"

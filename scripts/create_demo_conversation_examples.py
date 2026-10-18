@@ -12,7 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment2 import TEACHING_TURNS
+from cue_eval.experiment import TEACHING_TURNS
 
 
 DEFAULT_OUTPUT_DIR = ROOT / "outputs" / "experiment_2_bedrock_run4"
