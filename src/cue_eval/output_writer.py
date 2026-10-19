@@ -91,43 +91,53 @@ def summarize_usage_by_subexperiment(
     return summaries
 
 
-def summarize_experiment(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def summarize_experiment(
+    rows: list[dict[str, Any]],
+    *,
+    group_by_model: bool = False,
+) -> list[dict[str, Any]]:
     """Aggregate probe responses for summary artifacts."""
     summary: list[dict[str, Any]] = []
     datasets = sorted({row["dataset"] for row in rows})
+    models: list[str | None] = (
+        sorted({str(row["model"]) for row in rows}) if group_by_model else [None]
+    )
     conditions = sorted({row["condition"] for row in rows})
     reasoning_modes = sorted({row["reasoning"] for row in rows})
     cue_counts = sorted({int(row["cue_count"]) for row in rows})
     for dataset in datasets:
-        for condition in conditions:
-            for reasoning in reasoning_modes:
-                for cue_count in cue_counts:
-                    group = [
-                        row
-                        for row in rows
-                        if row["dataset"] == dataset
-                        and row["condition"] == condition
-                        and row["reasoning"] == reasoning
-                        and int(row["cue_count"]) == cue_count
-                    ]
-                    if not group:
-                        continue
-                    category_counts = {
-                        label: sum(row["probe_label"] == label for row in group)
-                        for label, _, _, _ in PROBE_RESPONSE_CATEGORIES
-                    }
-                    unknown_labels = {
-                        row["probe_label"]
-                        for row in group
-                        if row["probe_label"] not in category_counts
-                    }
-                    if unknown_labels:
-                        names = ", ".join(sorted(unknown_labels))
-                        raise ValueError(f"Unknown probe response labels: {names}")
-                    valid = [row for row in group if row["probe_label"] != "parse_fail"]
-                    held_counts = [int(row["rule_held_count"]) for row in valid]
-                    summary.append(
-                        {
+        for model in models:
+            for condition in conditions:
+                for reasoning in reasoning_modes:
+                    for cue_count in cue_counts:
+                        group = [
+                            row
+                            for row in rows
+                            if row["dataset"] == dataset
+                            and (model is None or str(row["model"]) == model)
+                            and row["condition"] == condition
+                            and row["reasoning"] == reasoning
+                            and int(row["cue_count"]) == cue_count
+                        ]
+                        if not group:
+                            continue
+                        category_counts = {
+                            label: sum(row["probe_label"] == label for row in group)
+                            for label, _, _, _ in PROBE_RESPONSE_CATEGORIES
+                        }
+                        unknown_labels = {
+                            row["probe_label"]
+                            for row in group
+                            if row["probe_label"] not in category_counts
+                        }
+                        if unknown_labels:
+                            names = ", ".join(sorted(unknown_labels))
+                            raise ValueError(f"Unknown probe response labels: {names}")
+                        valid = [
+                            row for row in group if row["probe_label"] != "parse_fail"
+                        ]
+                        held_counts = [int(row["rule_held_count"]) for row in valid]
+                        summary_row = {
                             "dataset": dataset,
                             "condition": condition,
                             "reasoning": reasoning,
@@ -149,7 +159,9 @@ def summarize_experiment(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                                 sum(held_counts) / len(held_counts) if held_counts else 0.0
                             ),
                         }
-                    )
+                        if model is not None:
+                            summary_row = {"model": model, **summary_row}
+                        summary.append(summary_row)
     return summary
 
 
@@ -176,6 +188,35 @@ def write_experiment_outputs(
     )
     _write_story_token_count_plot(
         output_path / "experiment_story_token_count_by_cue_count.png",
+        rows,
+        teaching_turns,
+    )
+    return summary
+
+
+def write_combined_experiment_outputs(
+    output_dir: str | Path,
+    rows: list[dict[str, Any]],
+    teaching_turns: int = DEFAULT_TEACHING_TURNS,
+) -> list[dict[str, Any]]:
+    """Write one model-comparison summary and graph set."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    summary = summarize_experiment(rows, group_by_model=True)
+    write_csv(output_path / "combined_experiment_summary.csv", summary)
+    _write_cue_count_plot(
+        output_path / "combined_shortcut_count_by_cue_count.png",
+        summary,
+        use_rate=False,
+    )
+    _write_cue_count_plot(
+        output_path / "combined_shortcut_rate.png", summary, use_rate=True
+    )
+    _write_response_category_plot(
+        output_path / "combined_response_categories_stacked.png", summary
+    )
+    _write_story_token_count_plot(
+        output_path / "combined_story_token_count_by_cue_count.png",
         rows,
         teaching_turns,
     )
@@ -493,7 +534,12 @@ def _write_cue_count_plot(
         return
 
     dataset = "math500"
-    color = "#d62728"
+    model_names = sorted(
+        {str(row["model"]) for row in summary if row.get("model") is not None}
+    )
+    series_names = model_names or ["MATH-500"]
+    colors = ["#1f77b4", "#d62728", "#2ca02c", "#9467bd"]
+    markers = ["o", "s", "^", "D"]
     conditions = sorted({str(row["condition"]) for row in summary})
     fig, axes = plt.subplots(
         len(conditions),
@@ -513,30 +559,45 @@ def _write_cue_count_plot(
     for condition_index, condition in enumerate(conditions):
         for reasoning_index, reasoning in enumerate(["off", "on"]):
             ax = axes[condition_index][reasoning_index]
-            points = [
-                row
-                for row in summary
-                if row["dataset"] == dataset
-                and row["condition"] == condition
-                and row["reasoning"] == reasoning
-            ]
-            x_values = [row["cue_count"] for row in points]
-            y_values = [
-                row[y_key] * 100 if use_rate else row[y_key] for row in points
-            ]
-            ax.plot(x_values, y_values, marker="o", label="MATH-500", color=color)
-            for x_value, y_value, row in zip(x_values, y_values, points):
-                ax.text(
-                    x_value,
-                    y_value + (3 if use_rate else 1),
-                    sample_size_label(row),
-                    fontsize=7,
-                    ha="center",
+            all_x_values: set[int] = set()
+            for series_index, series_name in enumerate(series_names):
+                points = [
+                    row
+                    for row in summary
+                    if row["dataset"] == dataset
+                    and row["condition"] == condition
+                    and row["reasoning"] == reasoning
+                    and (
+                        not model_names
+                        or str(row.get("model")) == series_name
+                    )
+                ]
+                x_values = [int(row["cue_count"]) for row in points]
+                y_values = [
+                    row[y_key] * 100 if use_rate else row[y_key] for row in points
+                ]
+                all_x_values.update(x_values)
+                color = colors[series_index % len(colors)]
+                ax.plot(
+                    x_values,
+                    y_values,
+                    marker=markers[series_index % len(markers)],
+                    label=series_name,
                     color=color,
                 )
+                for x_value, y_value, row in zip(x_values, y_values, points):
+                    label_offset = (3 if use_rate else 1) * (series_index + 1)
+                    ax.text(
+                        x_value,
+                        y_value + label_offset,
+                        sample_size_label(row),
+                        fontsize=7,
+                        ha="center",
+                        color=color,
+                    )
             ax.set_title(f"{condition}; reasoning = {reasoning}")
             ax.set_xlabel("no. of times cue appears in each story")
-            ax.set_xticks(x_values)
+            ax.set_xticks(sorted(all_x_values))
             ax.grid(True, alpha=0.25)
 
     max_y = max(
@@ -545,7 +606,7 @@ def _write_cue_count_plot(
     )
     for row_axes in axes:
         row_axes[0].set_ylabel(y_label)
-    axes[0][0].legend(title="dataset", fontsize=8)
+    axes[0][0].legend(title="model" if model_names else "dataset", fontsize=8)
     fig.suptitle(
         f"Math500 live-history shortcut {title_metric} by wrong-answer cue count\n"
         "(5 story templates per cue count; n labeled at every point)",
@@ -582,24 +643,33 @@ def _write_response_category_plot(
 
     dataset = "math500"
     conditions = sorted({str(row["condition"]) for row in summary})
+    model_names = sorted(
+        {str(row["model"]) for row in summary if row.get("model") is not None}
+    )
+    panels = [
+        (condition, model)
+        for condition in conditions
+        for model in (model_names or [None])
+    ]
     fig, axes = plt.subplots(
-        len(conditions),
+        len(panels),
         2,
-        figsize=(12, 5.2 * len(conditions)),
+        figsize=(12, 5.2 * len(panels)),
         sharey=True,
         squeeze=False,
     )
     max_total = max((int(row["total_n"]) for row in summary), default=0)
 
-    for condition_index, condition in enumerate(conditions):
+    for panel_index, (condition, model) in enumerate(panels):
         for reasoning_index, reasoning in enumerate(["off", "on"]):
-            ax = axes[condition_index][reasoning_index]
+            ax = axes[panel_index][reasoning_index]
             points = [
                 row
                 for row in summary
                 if row["dataset"] == dataset
                 and row["condition"] == condition
                 and row["reasoning"] == reasoning
+                and (model is None or str(row.get("model")) == model)
             ]
             x_values = [int(row["cue_count"]) for row in points]
             bottoms = [0] * len(points)
@@ -642,7 +712,8 @@ def _write_response_category_plot(
                     va="bottom",
                     fontsize=7,
                 )
-            ax.set_title(f"{condition}; reasoning = {reasoning}")
+            model_title = f"; model = {model}" if model is not None else ""
+            ax.set_title(f"{condition}{model_title}; reasoning = {reasoning}")
             ax.set_xlabel("no. of times cue appears in each story")
             ax.set_xticks(x_values)
             ax.set_ylim(0, max_total + 4)

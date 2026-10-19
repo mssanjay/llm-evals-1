@@ -1,0 +1,51 @@
+{
+  "conditions": [
+    "assistant_wrong",
+    "assistant_correct"
+  ],
+  "cue_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "episode_manifest_sha256": "293c6409b824b138595878d36a928d42f8af47d1c5b5009d28dc36efb99900f4",
+  "episodes_per_subexperiment": 45,
+  "models": [
+    "deepseek.v3.1",
+    "qwen.qwen3-32b"
+  ],
+  "passed": true,
+  "reasoning_modes": [
+    "off",
+    "on"
+  ],
+  "reasoning_preflights": [
+    {
+      "comparison": {
+        "measurement": "inline_response_chars",
+        "off": 23,
+        "on": 160
+      },
+      "model": "deepseek.v3.1",
+      "provider": "aws"
+    },
+    {
+      "comparison": {
+        "measurement": "inline_response_chars",
+        "off": 17,
+        "on": 210
+      },
+      "model": "qwen.qwen3-32b",
+      "provider": "aws"
+    }
+  ],
+  "result_rows": 3600,
+  "subexperiments": 80
+}

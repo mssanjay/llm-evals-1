@@ -14,6 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.experiment import validate_completed_matrix
+from cue_eval.output_writer import (
+    write_combined_experiment_outputs,
+    write_csv,
+    write_json,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,20 +50,27 @@ def main() -> None:
         {
             "provider": item["provider"],
             "model": item["model"],
-            "off_reasoning_chars": item["off"]["reasoning_chars"],
-            "on_reasoning_chars": item["on"]["reasoning_chars"],
+            "comparison": item.get(
+                "comparison",
+                {
+                    "measurement": "reasoning_chars",
+                    "off": item["off"]["reasoning_chars"],
+                    "on": item["on"]["reasoning_chars"],
+                },
+            ),
         }
         for item in preflights
     ]
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    _write_csv(args.output_dir / "combined_experiment_results.csv", rows)
-    _write_csv(args.output_dir / "combined_usage_by_subexperiment.csv", usage_rows)
-    (args.output_dir / "matrix_validation.json").write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    write_csv(args.output_dir / "combined_experiment_results.csv", rows)
+    write_csv(args.output_dir / "combined_usage_by_subexperiment.csv", usage_rows)
+    write_json(args.output_dir / "matrix_validation.json", report)
+    summary = write_combined_experiment_outputs(args.output_dir, rows)
+    print(
+        f"Validated {report['result_rows']} rows across {report['subexperiments']} cells. "
+        f"Wrote {len(summary)} model-level summary rows and one combined graph set."
     )
-    print(f"Validated {report['result_rows']} rows across {report['subexperiments']} cells.")
 
 
 def _read_csv(path: Path) -> list[dict[str, Any]]:
@@ -74,16 +86,6 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(path)
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
-    """Write combined rows with Excel-compatible UTF-8 encoding."""
-    if not rows:
-        return
-    with path.open("w", newline="", encoding="utf-8-sig") as file:
-        writer = csv.DictWriter(file, fieldnames=list(rows[0].keys()))
-        writer.writeheader()
-        writer.writerows(rows)
 
 
 if __name__ == "__main__":

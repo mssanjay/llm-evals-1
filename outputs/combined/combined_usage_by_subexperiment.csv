@@ -1,0 +1,81 @@
+﻿provider,model,dataset,condition,reasoning,cue_count,episodes,plus_one_episodes,times_ten_episodes,random_episodes,model_calls,calls_with_usage,input_tokens,output_tokens,total_tokens,estimated_input_cost_usd,estimated_output_cost_usd,estimated_cost_usd,input_cost_per_million_usd,output_cost_per_million_usd,pricing_source
+aws,deepseek.v3.1,math500,assistant_correct,off,1,45,15,15,15,45,45,28477,357,28834,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,2,45,15,15,15,45,45,29768,5305,35073,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,3,45,15,15,15,45,45,31059,350,31409,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,4,45,15,15,15,45,45,32962,357,33319,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,5,45,15,15,15,45,45,34253,358,34611,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,6,45,15,15,15,45,45,35616,539,36155,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,7,45,15,15,15,45,45,37483,341,37824,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,8,45,15,15,15,45,45,39386,345,39731,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,9,45,15,15,15,45,45,41001,992,41993,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,off,10,45,15,15,15,45,45,42976,338,43314,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,1,45,15,15,15,45,45,28342,65560,93902,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,2,45,15,15,15,45,45,29633,49270,78903,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,3,45,15,15,15,45,45,30924,56132,87056,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,4,45,15,15,15,45,45,32827,62587,95414,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,5,45,15,15,15,45,45,34118,57761,91879,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,6,45,15,15,15,45,45,35481,50367,85848,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,7,45,15,15,15,45,45,37348,56695,94043,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,8,45,15,15,15,45,45,39251,63312,102563,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,9,45,15,15,15,45,45,40866,63853,104719,,,,,,
+aws,deepseek.v3.1,math500,assistant_correct,on,10,45,15,15,15,45,45,42841,57831,100672,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,1,45,15,15,15,45,45,28479,339,28818,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,2,45,15,15,15,45,45,29769,3807,33576,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,3,45,15,15,15,45,45,31059,341,31400,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,4,45,15,15,15,45,45,32961,334,33295,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,5,45,15,15,15,45,45,34251,8912,43163,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,6,45,15,15,15,45,45,35613,550,36163,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,7,45,15,15,15,45,45,37479,3636,41115,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,8,45,15,15,15,45,45,39381,307,39688,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,9,45,15,15,15,45,45,40995,943,41938,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,off,10,45,15,15,15,45,45,42969,5826,48795,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,1,45,15,15,15,45,45,28344,50488,78832,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,2,45,15,15,15,45,45,29634,43552,73186,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,3,45,15,15,15,45,45,30924,45262,76186,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,4,45,15,15,15,45,45,32826,34469,67295,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,5,45,15,15,15,45,45,34116,38964,73080,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,6,45,15,15,15,45,45,35478,35261,70739,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,7,45,15,15,15,45,45,37344,42822,80166,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,8,45,15,15,15,45,45,39246,46098,85344,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,9,45,15,15,15,45,45,40860,49115,89975,,,,,,
+aws,deepseek.v3.1,math500,assistant_wrong,on,10,45,15,15,15,45,45,42834,48913,91747,,,,,,
+aws,qwen.qwen3-32b,math500,assistant_correct,off,1,45,15,15,15,45,45,31022,419,31441,0.0046533,0.0002514,0.0049047,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,2,45,15,15,15,45,45,32251,415,32666,0.00483765,0.000249,0.00508665,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,3,45,15,15,15,45,45,33840,419,34259,0.005076,0.0002514,0.0053274,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,4,45,15,15,15,45,45,35825,416,36241,0.00537375,0.0002496,0.00562335,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,5,45,15,15,15,45,45,37378,419,37797,0.0056067,0.0002514,0.0058581,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,6,45,15,15,15,45,45,38931,419,39350,0.00583965,0.0002514,0.00609105,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,7,45,15,15,15,45,45,41096,418,41514,0.0061644,0.0002508,0.0064152,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,8,45,15,15,15,45,45,43081,417,43498,0.00646215,0.0002502,0.00671235,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,9,45,15,15,15,45,45,44886,421,45307,0.0067329,0.0002526,0.0069855,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,off,10,45,15,15,15,45,45,47015,417,47432,0.00705225,0.0002502,0.00730245,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,1,45,15,15,15,45,45,30842,17117,47959,0.0046263,0.0102702,0.0148965,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,2,45,15,15,15,45,45,32071,25394,57465,0.00481065,0.0152364,0.02004705,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,3,45,15,15,15,45,45,33660,39242,72902,0.005049,0.0235452,0.0285942,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,4,45,15,15,15,45,45,35645,24810,60455,0.00534675,0.014886,0.02023275,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,5,45,15,15,15,45,45,37198,17777,54975,0.0055797,0.0106662,0.0162459,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,6,45,15,15,15,45,45,38751,23537,62288,0.00581265,0.0141222,0.01993485,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,7,45,15,15,15,45,45,40916,18981,59897,0.0061374,0.0113886,0.017526,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,8,45,15,15,15,45,45,42901,16833,59734,0.00643515,0.0100998,0.01653495,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,9,45,15,15,15,45,45,44706,25597,70303,0.0067059,0.0153582,0.0220641,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_correct,on,10,45,15,15,15,45,45,46835,20263,67098,0.00702525,0.0121578,0.01918305,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,1,45,15,15,15,45,45,31178,429,31607,0.0046767,0.0002574,0.0049341,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,2,45,15,15,15,45,45,32483,429,32912,0.00487245,0.0002574,0.00512985,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,3,45,15,15,15,45,45,34148,431,34579,0.0051222,0.0002586,0.0053808,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,4,45,15,15,15,45,45,36209,428,36637,0.00543135,0.0002568,0.00568815,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,5,45,15,15,15,45,45,37838,427,38265,0.0056757,0.0002562,0.0059319,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,6,45,15,15,15,45,45,39467,505,39972,0.00592005,0.000303,0.00622305,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,7,45,15,15,15,45,45,41708,429,42137,0.0062562,0.0002574,0.0065136,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,8,45,15,15,15,45,45,43769,428,44197,0.00656535,0.0002568,0.00682215,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,9,45,15,15,15,45,45,45650,426,46076,0.0068475,0.0002556,0.0071031,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,off,10,45,15,15,15,45,45,47855,430,48285,0.00717825,0.000258,0.00743625,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,1,45,15,15,15,45,45,30998,15830,46828,0.0046497,0.009498,0.0141477,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,2,45,15,15,15,45,45,32303,24949,57252,0.00484545,0.0149694,0.01981485,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,3,45,15,15,15,45,45,33968,18874,52842,0.0050952,0.0113244,0.0164196,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,4,45,15,15,15,45,45,36029,16870,52899,0.00540435,0.010122,0.01552635,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,5,45,15,15,15,45,45,37658,31495,69153,0.0056487,0.018897,0.0245457,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,6,45,15,15,15,45,45,39287,14732,54019,0.00589305,0.0088392,0.01473225,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,7,45,15,15,15,45,45,41528,14862,56390,0.0062292,0.0089172,0.0151464,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,8,45,15,15,15,45,45,43589,16386,59975,0.00653835,0.0098316,0.01636995,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,9,45,15,15,15,45,45,45470,16873,62343,0.0068205,0.0101238,0.0169443,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+aws,qwen.qwen3-32b,math500,assistant_wrong,on,10,45,15,15,15,45,45,47675,16388,64063,0.00715125,0.0098328,0.01698405,0.15,0.6,"Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
