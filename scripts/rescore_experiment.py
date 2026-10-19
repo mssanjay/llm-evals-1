@@ -1,4 +1,4 @@
-"""Rescore completed Experiment 2 outputs without making model calls."""
+"""Rescore completed Experiment 1 outputs without making model calls."""
 
 from __future__ import annotations
 
@@ -16,13 +16,12 @@ sys.path.insert(0, str(ROOT / "src"))
 from cue_eval.experiment import (
     CHECKPOINT_VERSION,
     rescore_experiment_rows,
-    write_experiment_outputs,
-    write_grouped_episode_prompts,
 )
+from cue_eval.output_writer import write_experiment_outputs, write_grouped_episode_prompts
 
 
 def parse_args() -> argparse.Namespace:
-    """Collect the completed Experiment 2 output directory."""
+    """Collect the completed Experiment 1 output directory."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
@@ -61,7 +60,7 @@ def main() -> None:
     )
     remaining = sum(row["probe_label"] == "parse_fail" for row in rows)
     print(f"Recovered {recovered} completed responses; {remaining} parse failures remain.")
-    print(f"Updated Experiment 2 artifacts in {args.output_dir.resolve()}")
+    print(f"Updated Experiment 1 artifacts in {args.output_dir.resolve()}")
 
 
 def _find_results(output_dir: Path) -> Path:
@@ -70,7 +69,7 @@ def _find_results(output_dir: Path) -> Path:
         candidate = output_dir / name
         if candidate.exists():
             return candidate
-    raise FileNotFoundError(f"No Experiment 2 result CSV found in {output_dir}")
+    raise FileNotFoundError(f"No Experiment 1 result CSV found in {output_dir}")
 
 
 def _update_checkpoint(output_dir: Path) -> dict[str, Any]:
@@ -113,6 +112,7 @@ def _write_full_results(
                 "Dataset": row["dataset"],
                 "Cue type": "wrong_answer_shortcut_cue",
                 "History": "live-history teaching turns",
+                "Condition": row["condition"],
                 "Reasoning": row["reasoning"],
                 "Story": f"cue_count={cue_count}",
                 "n": row["n"],

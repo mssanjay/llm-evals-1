@@ -1,0 +1,15 @@
+{
+  "provider": "aws",
+  "model": "qwen.qwen3-32b",
+  "model_calls": 1800,
+  "calls_with_usage": 1800,
+  "input_tokens": 1547660,
+  "output_tokens": 425352,
+  "total_tokens": 1973012,
+  "estimated_input_cost_usd": 0.232149,
+  "estimated_output_cost_usd": 0.2552112,
+  "estimated_cost_usd": 0.4873602,
+  "input_cost_per_million_usd": 0.15,
+  "output_cost_per_million_usd": 0.6,
+  "pricing_source": "Amazon Bedrock standard on-demand pricing, verified 2026-10-01"
+}

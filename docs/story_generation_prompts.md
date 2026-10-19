@@ -53,6 +53,6 @@ Run that prompt ten times, once for each cue count, then concatenate the JSONL
 responses in cue-count order.
 
 The JSONL stores repeated placeholders so cue counts remain mechanically
-verifiable. During Experiment 2, the renderer replaces those placeholders in
+verifiable. During Experiment 1, the renderer replaces those placeholders in
 order with distinct paraphrases of the same shortcut answer; the model does not
 see the placeholder or one verbatim sentence repeated multiple times.

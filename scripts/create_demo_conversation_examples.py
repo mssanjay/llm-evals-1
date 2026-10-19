@@ -1,4 +1,4 @@
-"""Create demo conversations from grouped Experiment 2 episode logs."""
+"""Create demo conversations from grouped Experiment 1 episode logs."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from cue_eval.experiment import TEACHING_TURNS
 
 
-DEFAULT_OUTPUT_DIR = ROOT / "outputs" / "experiment_2_bedrock_run4"
+DEFAULT_OUTPUT_DIR = ROOT / "outputs" / "experiment_comparison"
 DEFAULT_CUE_COUNTS = (3, 5, 10)
 GROUPED_PROMPT_LOG = "model_prompts_by_episode.jsonl"
 DATA_FILENAME = "demo_conversation_examples.json"
@@ -35,13 +35,13 @@ def parse_args() -> argparse.Namespace:
     """Parse output-folder and example-selection arguments."""
 
     parser = argparse.ArgumentParser(
-        description="Create demo conversations from grouped Experiment 2 logs."
+        description="Create demo conversations from grouped Experiment 1 logs."
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
-        help="Experiment 2 output folder containing model_prompts_by_episode.jsonl.",
+        help="Experiment 1 output folder containing model_prompts_by_episode.jsonl.",
     )
     parser.add_argument(
         "--cue-counts",
@@ -70,10 +70,11 @@ def load_grouped_episodes(prompt_log: Path) -> list[dict[str, Any]]:
     return episodes
 
 
-def episode_key(episode: dict[str, Any]) -> tuple[int, int, str]:
+def episode_key(episode: dict[str, Any]) -> tuple[str, int, int, str]:
     """Return the fields shared by reasoning-on and reasoning-off episodes."""
 
     return (
+        str(episode["condition"]),
         int(episode["cue_count"]),
         int(episode["episode_index"]),
         str(episode["probe_id"]),
@@ -94,10 +95,10 @@ def probe_turn(episode: dict[str, Any]) -> dict[str, Any]:
 
 def pair_episodes(
     episodes: list[dict[str, Any]],
-) -> dict[tuple[int, int, str], dict[str, dict[str, Any]]]:
+) -> dict[tuple[str, int, int, str], dict[str, dict[str, Any]]]:
     """Pair complete episodes by reasoning mode."""
 
-    pairs: dict[tuple[int, int, str], dict[str, dict[str, Any]]] = {}
+    pairs: dict[tuple[str, int, int, str], dict[str, dict[str, Any]]] = {}
     for episode in episodes:
         reasoning = str(episode["reasoning"])
         if reasoning not in {"off", "on"}:
@@ -111,7 +112,7 @@ def pair_episodes(
 
 def select_episode_pairs(
     episodes: list[dict[str, Any]], cue_counts: list[int]
-) -> list[tuple[tuple[int, int, str], dict[str, dict[str, Any]]]]:
+) -> list[tuple[tuple[str, int, int, str], dict[str, dict[str, Any]]]]:
     """Select one informative, stable reasoning pair for each cue count."""
 
     complete_pairs = [
@@ -121,10 +122,10 @@ def select_episode_pairs(
     ]
     complete_pairs.sort(key=lambda item: item[0])
 
-    selected: list[tuple[tuple[int, int, str], dict[str, dict[str, Any]]]] = []
+    selected: list[tuple[tuple[str, int, int, str], dict[str, dict[str, Any]]]] = []
     used_probe_ids: set[str] = set()
     for cue_count in cue_counts:
-        candidates = [item for item in complete_pairs if item[0][0] == cue_count]
+        candidates = [item for item in complete_pairs if item[0][1] == cue_count]
         if not candidates:
             raise ValueError(f"No complete reasoning pair found for cue_count={cue_count}")
 
@@ -136,10 +137,10 @@ def select_episode_pairs(
             and not bool(probe_turn(item[1]["on"]).get("took_shortcut"))
         ]
         pool = informative or candidates
-        unique = [item for item in pool if item[0][2] not in used_probe_ids]
+        unique = [item for item in pool if item[0][3] not in used_probe_ids]
         chosen = (unique or pool)[0]
         selected.append(chosen)
-        used_probe_ids.add(chosen[0][2])
+        used_probe_ids.add(chosen[0][3])
 
     return selected
 
@@ -219,6 +220,7 @@ def build_mode_example(episode: dict[str, Any]) -> dict[str, Any]:
         "provider": episode["provider"],
         "model": episode["model"],
         "dataset": episode["dataset"],
+        "condition": episode["condition"],
         "cue_count": int(episode["cue_count"]),
         "cue_strategy": episode["cue_strategy"],
         "episode_index": int(episode["episode_index"]),
@@ -246,10 +248,11 @@ def build_examples(
 
     examples: list[dict[str, Any]] = []
     for key, modes in select_episode_pairs(episodes, cue_counts):
-        cue_count, episode_index, probe_id = key
+        condition, cue_count, episode_index, probe_id = key
         examples.append(
             {
-                "id": f"cue_{cue_count}_episode_{episode_index}_{probe_id}",
+                "id": f"{condition}_cue_{cue_count}_episode_{episode_index}_{probe_id}",
+                "condition": condition,
                 "cue_count": cue_count,
                 "episode_index": episode_index,
                 "probe_id": probe_id,
@@ -281,7 +284,7 @@ def validate_model_inputs(examples: list[dict[str, Any]]) -> None:
         sample = "\n".join(f"- {match}" for match in matches[:5])
         raise ValueError(
             "The selected probe requests contain old scaffold labels. Rerun "
-            f"Experiment 2 with cleaned prompts.\n{sample}"
+            f"Experiment 1 with cleaned prompts.\n{sample}"
         )
 
 
@@ -310,7 +313,7 @@ def write_json_files(
     payload = {
         "schema_version": "2.0",
         "description": (
-            "Experiment 2 examples with three predetermined assistant responses "
+            "Experiment 1 examples with three predetermined assistant responses "
             "followed by one model-generated probe response."
         ),
         "source": {"grouped_prompt_log": relative_display(prompt_log)},

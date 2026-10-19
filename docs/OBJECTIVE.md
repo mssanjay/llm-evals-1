@@ -22,12 +22,19 @@ See [CUE_IMPLEMENTATION.md](CUE_IMPLEMENTATION.md)
 ## model evaluation
 
 - use azureml://registries/azureml-alibaba/models/qwen3-32b/versions/1
-- Qwen3 32B serverless endpoint
+- run Qwen and DeepSeek
+- compare reasoning off and reasoning on after a two-call reasoning-field check
 
 
 ## experiments
 
 ### Experiment 1:
+
+- Condition 1: teaching story number = wrong cue = scripted assistant answer
+- Condition 2: teaching story number = gold = scripted assistant answer
+- Probe for both conditions: new problem with a wrong cue
+- 45 shared probe episodes with 15 episodes per shortcut cue type
+- Three shortcut cue types: plus one, times ten, and deterministic random
 
 Pool of stories:
 5 stories with 1 {wrong_answer_shortcut_cue}  in one story

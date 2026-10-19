@@ -1,4 +1,4 @@
-"""Create readable Experiment 2 walkthrough docs from the detailed CSV."""
+"""Create readable Experiment 1 walkthrough docs from the detailed CSV."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_INPUT = Path("outputs/experiment_2_bedrock_run4/all_experiment_results.csv")
-DEFAULT_OUTPUT_DIR = Path("outputs/experiment_2_bedrock_run4/episode_walkthroughs")
+DEFAULT_INPUT = Path("outputs/experiment_comparison/all_experiment_results.csv")
+DEFAULT_OUTPUT_DIR = Path("outputs/experiment_comparison/episode_walkthroughs")
 DEFAULT_TARGET_CUE_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9,10]
 TEACHING_TURNS = 3
 
@@ -50,22 +50,24 @@ def main() -> None:
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:
-    """Read the detailed Experiment 2 CSV."""
+    """Read the detailed Experiment 1 CSV."""
     with path.open(encoding="utf-8-sig", newline="") as handle:
         return list(csv.DictReader(handle))
 
 
-def _paired_rows(rows: Iterable[dict[str, str]]) -> dict[tuple[str, str, str], dict[str, dict[str, str]]]:
+def _paired_rows(
+    rows: Iterable[dict[str, str]],
+) -> dict[tuple[str, str, str, str], dict[str, dict[str, str]]]:
     """Group rows so reasoning off/on can be compared for the same episode."""
-    pairs: dict[tuple[str, str, str], dict[str, dict[str, str]]] = defaultdict(dict)
+    pairs: dict[tuple[str, str, str, str], dict[str, dict[str, str]]] = defaultdict(dict)
     for row in rows:
-        key = (row["cue_count"], row["episode_index"], row["probe_id"])
+        key = (row["condition"], row["cue_count"], row["episode_index"], row["probe_id"])
         pairs[key][row["reasoning"]] = row
     return {key: value for key, value in pairs.items() if "off" in value and "on" in value}
 
 
 def _select_episode_pairs(
-    pairs: dict[tuple[str, str, str], dict[str, dict[str, str]]],
+    pairs: dict[tuple[str, str, str, str], dict[str, dict[str, str]]],
     target_cue_counts: list[int],
     wanted: int,
 ) -> list[dict[str, dict[str, str]]]:
@@ -131,14 +133,20 @@ def _first_pair(
 def _episode_file_name(index: int, pair: dict[str, dict[str, str]]) -> str:
     """Build a stable markdown file name."""
     off = pair["off"]
-    return f"episode_{index:02d}_cue_{off['cue_count']}_{off['probe_id']}.md"
+    return (
+        f"episode_{index:02d}_{off['condition']}_cue_"
+        f"{off['cue_count']}_{off['probe_id']}.md"
+    )
 
 
 def _episode_markdown(index: int, pair: dict[str, dict[str, str]]) -> str:
     """Render one paired episode as a readable walkthrough."""
     off = pair["off"]
     on = pair["on"]
-    title = f"Episode {index}: Cue Count {off['cue_count']} - Probe {off['probe_id']}"
+    title = (
+        f"Episode {index}: {off['condition']} - Cue Count {off['cue_count']} "
+        f"- Probe {off['probe_id']}"
+    )
     lines = [
         f"# {title}",
         "",
@@ -172,7 +180,7 @@ def _flow_markdown(
 ) -> str:
     """Render the overview flow document."""
     lines = [
-        "# Experiment 2 Flow Walkthrough",
+        "# Experiment 1 Flow Walkthrough",
         "",
         "This document turns the detailed CSV into a coach-friendly story.",
         "It explains how a multi-turn episode works and links to five example episodes.",

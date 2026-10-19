@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.cue_strategies import paraphrase_shortcut_cues
 from cue_eval.experiment import _story_text
-from cue_eval.story_pool import PLACEHOLDER, render_story
+from cue_eval.story_pool import PLACEHOLDER, render_story, validate_story_pool
 
 
 def test_render_story_uses_distinct_cue_paraphrases() -> None:
@@ -29,7 +29,7 @@ def test_render_story_uses_distinct_cue_paraphrases() -> None:
 
 
 def test_experiment_story_paraphrases_the_shortcut_cue() -> None:
-    """Use paraphrases in Experiment 2 instead of its stored verbatim clue."""
+    """Use paraphrases in Experiment 1 instead of its stored verbatim clue."""
     template = f"One note said {PLACEHOLDER}. Another said {PLACEHOLDER}."
     example = {
         "bad_clue": "Remember this note: a previous student said the answer is 17.",
@@ -50,3 +50,9 @@ def test_render_story_rejects_too_few_paraphrases() -> None:
 
     with pytest.raises(ValueError, match="needs 2 cue phrases"):
         render_story(template, ["the answer was 17"])
+
+
+def test_story_pool_requires_at_least_50_stories() -> None:
+    """Reject a pool too small for the agreed experiment protocol."""
+    with pytest.raises(ValueError, match="at least 50"):
+        validate_story_pool({1: [{"id": "only-one"}]}, [1], turns_per_episode=4)

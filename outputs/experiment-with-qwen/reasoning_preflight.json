@@ -1,0 +1,32 @@
+{
+  "comparison": {
+    "measurement": "inline_response_chars",
+    "off": 17,
+    "on": 210
+  },
+  "max_tokens": 8192,
+  "model": "qwen.qwen3-32b",
+  "off": {
+    "completion_tokens": 8,
+    "finish_reason": "stop",
+    "prompt_tokens": 68,
+    "reasoning": "",
+    "reasoning_chars": 0,
+    "reasoning_tokens": null,
+    "response": "Final answer: 323",
+    "response_chars": 17
+  },
+  "on": {
+    "completion_tokens": 90,
+    "finish_reason": "stop",
+    "prompt_tokens": 64,
+    "reasoning": "",
+    "reasoning_chars": 0,
+    "reasoning_tokens": null,
+    "response": "To compute $ 17 \\times 19 $, we can use the standard multiplication method or simplify it using algebra:\n\n$$\n17 \\times 19 = 17 \\times (20 - 1) = 17 \\times 20 - 17 \\times 1 = 340 - 17 = 323\n$$\n\nFinal answer: 323",
+    "response_chars": 210
+  },
+  "passed": true,
+  "provider": "aws",
+  "same_user_input": "Compute 17 times 19. Always end with 'Final answer: <number>'."
+}

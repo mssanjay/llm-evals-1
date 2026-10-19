@@ -20,6 +20,8 @@ class ModelResponse:
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
     total_tokens: int | None = None
+    reasoning: str = ""
+    reasoning_tokens: int | None = None
 
     @property
     def was_truncated(self) -> bool:
@@ -32,7 +34,7 @@ def call_model(
     messages: list[dict[str, str]],
     model: str,
     temperature: float,
-    max_tokens: int = 2048,
+    max_tokens: int = 8192,
 ) -> str:
     """Route a chat request and return only its assistant text."""
     return call_model_result(provider, messages, model, temperature, max_tokens).content
@@ -43,7 +45,7 @@ def call_model_result(
     messages: list[dict[str, str]],
     model: str,
     temperature: float,
-    max_tokens: int = 2048,
+    max_tokens: int = 8192,
 ) -> ModelResponse:
     """Route a chat request and preserve completion metadata."""
     if provider == "dryrun":
@@ -220,7 +222,7 @@ def _call_azure_ai_inference(
                 "Azure AI could not find the requested model deployment. "
                 f"Check that --model exactly matches the Azure deployment name: {model_name!r}. "
                 "For the Qwen3 32B serverless endpoint used in this repo, use "
-                "--model qwen3-32b if your endpoint/deployment is named qwen3-32b. "
+                "--model qwen.qwen3-32b if your endpoint/deployment is named qwen3-32b. "
                 "Also confirm AZURE_AI_ENDPOINT points to an "
                 "Azure AI Model Inference endpoint, not an Azure OpenAI resource."
             ) from error
@@ -308,17 +310,48 @@ def _chat_completion_result(data: dict[str, Any], provider_name: str) -> ModelRe
     completion_tokens = _optional_int(
         usage.get("completion_tokens", usage.get("output_tokens"))
     )
+    completion_details = (
+        usage.get("completion_tokens_details")
+        or usage.get("output_tokens_details")
+        or {}
+    )
+    reasoning_tokens = _optional_int(
+        completion_details.get("reasoning_tokens", usage.get("reasoning_tokens"))
+    )
     total_tokens = _optional_int(usage.get("total_tokens"))
     if total_tokens is None and prompt_tokens is not None and completion_tokens is not None:
         total_tokens = prompt_tokens + completion_tokens
 
+    reasoning = _message_text(
+        message.get("reasoning_content")
+        or message.get("reasoning")
+        or message.get("reasoning_details")
+    )
     return ModelResponse(
         content=text,
         finish_reason=choice.get("finish_reason"),
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         total_tokens=total_tokens,
+        reasoning=reasoning,
+        reasoning_tokens=reasoning_tokens,
     )
+
+
+def _message_text(value: Any) -> str:
+    """Normalize provider reasoning fields into plain text."""
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        parts = [
+            part.get("text", "")
+            for part in value
+            if isinstance(part, dict) and part.get("type") in {None, "text"}
+        ]
+        return "\n".join(part for part in parts if part)
+    return str(value)
 
 
 def _optional_int(value: Any) -> int | None:

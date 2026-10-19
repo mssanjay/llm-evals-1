@@ -1,0 +1,15 @@
+{
+  "provider": "aws",
+  "model": "deepseek.v3.1",
+  "model_calls": 1800,
+  "calls_with_usage": 1800,
+  "input_tokens": 1409174,
+  "output_tokens": 1052589,
+  "total_tokens": 2461763,
+  "estimated_input_cost_usd": null,
+  "estimated_output_cost_usd": null,
+  "estimated_cost_usd": null,
+  "input_cost_per_million_usd": null,
+  "output_cost_per_million_usd": null,
+  "pricing_source": null
+}

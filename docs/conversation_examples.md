@@ -1,10 +1,10 @@
 # Conversation Examples
 
 > Historical artifact: these examples predate scripted teaching answers. Current
-> Experiment 2 inserts three scripted teaching responses and calls the model only
+> Experiment 1 inserts three scripted teaching responses and calls the model only
 > for the probe.
 
-These are three full Experiment 2 conversations from the Bedrock run.
+These are three full Experiment 1 conversations from the Bedrock run.
 Each example includes both reasoning settings and all five model requests.
 
 Machine-readable files:

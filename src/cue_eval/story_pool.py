@@ -10,6 +10,7 @@ from typing import Any, Sequence
 PLACEHOLDER = "{wrong_answer_shortcut_cue}"
 MIN_STORY_WORDS = 60
 MAX_STORY_WORDS = 100
+MIN_STORY_POOL_SIZE = 50
 
 
 def load_story_pool(path: str | Path | None) -> dict[int, list[dict[str, Any]]]:
@@ -52,6 +53,41 @@ def choose_story_template(
     if not stories:
         return None
     return stories[example_index % len(stories)]["story"]
+
+
+def choose_story(
+    story_pool: dict[int, list[dict[str, Any]]],
+    cue_count: int,
+    example_index: int,
+) -> dict[str, Any] | None:
+    """Pick the complete story record so its ID can be audited."""
+    stories = story_pool.get(cue_count, [])
+    if not stories:
+        return None
+    return stories[example_index % len(stories)]
+
+
+def validate_story_pool(
+    story_pool: dict[int, list[dict[str, Any]]],
+    cue_counts: Sequence[int],
+    turns_per_episode: int,
+) -> None:
+    """Enforce the minimum pool and unique-story episode requirements."""
+    total_stories = sum(len(stories) for stories in story_pool.values())
+    if total_stories < MIN_STORY_POOL_SIZE:
+        raise ValueError(
+            f"Story pool has {total_stories} stories; expected at least {MIN_STORY_POOL_SIZE}."
+        )
+    for cue_count in cue_counts:
+        stories = story_pool.get(cue_count, [])
+        if len(stories) < turns_per_episode:
+            raise ValueError(
+                f"cue_count={cue_count} has {len(stories)} stories; "
+                f"expected at least {turns_per_episode} to avoid repeats within an episode."
+            )
+        story_ids = [str(story.get("id", "")) for story in stories]
+        if any(not story_id for story_id in story_ids) or len(story_ids) != len(set(story_ids)):
+            raise ValueError(f"cue_count={cue_count} must have unique, non-empty story IDs.")
 
 
 def render_story(

@@ -1,0 +1,41 @@
+{
+  "checkpoint_version": 7,
+  "conditions": [
+    "assistant_wrong",
+    "assistant_correct"
+  ],
+  "cue_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "cue_rendering_mode": "deterministic_paraphrases_v1",
+  "cue_strategies": [
+    "plus_one",
+    "times_ten",
+    "random"
+  ],
+  "data_sha256": "51df34010b203b84b1b9b8beb76171245c9051056d2bf9ebb052d113ebf8e65d",
+  "dataset": "math500",
+  "episode_count": 45,
+  "episode_limit": 45,
+  "episode_manifest_sha256": "293c6409b824b138595878d36a928d42f8af47d1c5b5009d28dc36efb99900f4",
+  "max_tokens": 8192,
+  "model": "deepseek.v3.1",
+  "provider": "aws",
+  "reasoning_modes": [
+    "off",
+    "on"
+  ],
+  "story_pool_sha256": "ddfb50eeb3d6b35b9ec7444b628dbefc045f25af5e9faf6ef7ab796456b99ecf",
+  "teaching_response_mode": "scripted_by_condition_v1",
+  "teaching_turns": 3,
+  "temperature": 0.2
+}

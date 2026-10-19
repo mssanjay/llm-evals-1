@@ -49,30 +49,18 @@ Now run the experiment cells.
 
 ## Run Experiment 1 in the notebook
 
-Experiment 1 tests whether repeating a bad clue more often makes the model follow it more.
+Experiment 1 uses the live-history teaching-turn methodology.
 
 ```python
-from cue_eval.experiment import run_experiment
+from cue_eval.experiment import run_experiment, run_reasoning_preflight, write_experiment_outputs
 
-rows, summary = run_experiment(
-    data_path=ROOT / "data" / "math500_prepared_50.jsonl",
-    output_dir=ROOT / "outputs" / "notebook_experiment1_azure",
+run_reasoning_preflight(
     provider="azure-foundry",
     model="qwen3-32b",
-    cue_counts=[0, 2, 10],
     temperature=0.2,
-    max_tokens=2048,
+    max_tokens=8192,
+    output_path=ROOT / "outputs" / "notebook_experiment_azure" / "reasoning_preflight.json",
 )
-
-summary
-```
-
-## Run Experiment 2 in the notebook
-
-Experiment 2 uses the live-history teaching-turn methodology.
-
-```python
-from cue_eval.experiment import run_experiment, write_experiment_outputs
 
 all_rows = run_experiment(
     data_path=ROOT / "data" / "math500_prepared_50.jsonl",
@@ -81,8 +69,9 @@ all_rows = run_experiment(
     provider="azure-foundry",
     model="qwen3-32b",
     temperature=0.2,
-    max_tokens=2048,
+    max_tokens=8192,
     reasoning_modes=["off", "on"],
+    conditions=["assistant_wrong", "assistant_correct"],
     cue_counts=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     max_workers=8,
     story_pool_path=ROOT / "data" / "story_pool.jsonl",
@@ -94,7 +83,7 @@ summary
 
 ## Start small
 
-Experiment 2 now uses every row in the prepared MATH500 file. Use `dryrun` first when you want a quick check without waiting for model calls.
+Experiment 1 uses 45 probe items from the prepared MATH500 file. Use `dryrun` first when you want a quick check without waiting for model calls.
 
 ## Key idea
 

@@ -1,4 +1,4 @@
-"""Group Experiment 2 prompt events into one JSONL object per episode."""
+"""Group Experiment 1 prompt events into one JSONL object per episode."""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment import write_grouped_episode_prompts
+from cue_eval.output_writer import write_grouped_episode_prompts
 
 
 def parse_args() -> argparse.Namespace:
-    """Collect the completed Experiment 2 output directory."""
+    """Collect the completed Experiment 1 output directory."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
@@ -42,7 +42,7 @@ def _find_results(output_dir: Path) -> Path:
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    raise FileNotFoundError(f"No Experiment 2 result CSV found in {output_dir}")
+    raise FileNotFoundError(f"No Experiment 1 result CSV found in {output_dir}")
 
 
 if __name__ == "__main__":

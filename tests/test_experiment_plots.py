@@ -1,4 +1,4 @@
-"""Coverage for Experiment 2 plot inputs and story-length diagnostics."""
+"""Coverage for Experiment 1 plot inputs and story-length diagnostics."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment import _sample_size_label, _story_token_counts_by_cue_count
+from cue_eval.output_writer import sample_size_label, story_token_counts_by_cue_count
 
 
 def test_story_token_counts_use_only_rendered_story_text() -> None:
@@ -26,10 +26,10 @@ def test_story_token_counts_use_only_rendered_story_text() -> None:
         },
     ]
 
-    assert _story_token_counts_by_cue_count(rows) == {2: [5, 4], 3: [7]}
+    assert story_token_counts_by_cue_count(rows) == {2: [5, 4], 3: [7]}
 
 
 def test_sample_size_label_keeps_total_episode_count_visible() -> None:
     """Distinguish the full condition size from valid parsed responses."""
-    assert _sample_size_label({"n": 45, "total_n": 45}) == "N=45"
-    assert _sample_size_label({"n": 42, "total_n": 45}) == "N=45\nvalid=42"
+    assert sample_size_label({"n": 45, "total_n": 45}) == "N=45"
+    assert sample_size_label({"n": 42, "total_n": 45}) == "N=45\nvalid=42"

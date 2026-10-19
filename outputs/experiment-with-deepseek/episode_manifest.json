@@ -1,0 +1,3262 @@
+{
+  "cue_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "data_sha256": "51df34010b203b84b1b9b8beb76171245c9051056d2bf9ebb052d113ebf8e65d",
+  "episode_count": 45,
+  "episodes": [
+    {
+      "episode_index": 0,
+      "probe_id": "math500_0009",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0003",
+        "math500_0005",
+        "math500_0006"
+      ]
+    },
+    {
+      "episode_index": 1,
+      "probe_id": "math500_0010",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0005",
+        "math500_0006",
+        "math500_0009"
+      ]
+    },
+    {
+      "episode_index": 2,
+      "probe_id": "math500_0012",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0006",
+        "math500_0009",
+        "math500_0010"
+      ]
+    },
+    {
+      "episode_index": 3,
+      "probe_id": "math500_0013",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0009",
+        "math500_0010",
+        "math500_0012"
+      ]
+    },
+    {
+      "episode_index": 4,
+      "probe_id": "math500_0016",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0010",
+        "math500_0012",
+        "math500_0013"
+      ]
+    },
+    {
+      "episode_index": 5,
+      "probe_id": "math500_0018",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0012",
+        "math500_0013",
+        "math500_0016"
+      ]
+    },
+    {
+      "episode_index": 6,
+      "probe_id": "math500_0019",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0013",
+        "math500_0016",
+        "math500_0018"
+      ]
+    },
+    {
+      "episode_index": 7,
+      "probe_id": "math500_0021",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0016",
+        "math500_0018",
+        "math500_0019"
+      ]
+    },
+    {
+      "episode_index": 8,
+      "probe_id": "math500_0022",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0018",
+        "math500_0019",
+        "math500_0021"
+      ]
+    },
+    {
+      "episode_index": 9,
+      "probe_id": "math500_0024",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0019",
+        "math500_0021",
+        "math500_0022"
+      ]
+    },
+    {
+      "episode_index": 10,
+      "probe_id": "math500_0026",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0021",
+        "math500_0022",
+        "math500_0024"
+      ]
+    },
+    {
+      "episode_index": 11,
+      "probe_id": "math500_0027",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0022",
+        "math500_0024",
+        "math500_0026"
+      ]
+    },
+    {
+      "episode_index": 12,
+      "probe_id": "math500_0029",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0024",
+        "math500_0026",
+        "math500_0027"
+      ]
+    },
+    {
+      "episode_index": 13,
+      "probe_id": "math500_0032",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0026",
+        "math500_0027",
+        "math500_0029"
+      ]
+    },
+    {
+      "episode_index": 14,
+      "probe_id": "math500_0034",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0027",
+        "math500_0029",
+        "math500_0032"
+      ]
+    },
+    {
+      "episode_index": 15,
+      "probe_id": "math500_0035",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0029",
+        "math500_0032",
+        "math500_0034"
+      ]
+    },
+    {
+      "episode_index": 16,
+      "probe_id": "math500_0037",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0032",
+        "math500_0034",
+        "math500_0035"
+      ]
+    },
+    {
+      "episode_index": 17,
+      "probe_id": "math500_0038",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0034",
+        "math500_0035",
+        "math500_0037"
+      ]
+    },
+    {
+      "episode_index": 18,
+      "probe_id": "math500_0039",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0035",
+        "math500_0037",
+        "math500_0038"
+      ]
+    },
+    {
+      "episode_index": 19,
+      "probe_id": "math500_0040",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0037",
+        "math500_0038",
+        "math500_0039"
+      ]
+    },
+    {
+      "episode_index": 20,
+      "probe_id": "math500_0041",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0038",
+        "math500_0039",
+        "math500_0040"
+      ]
+    },
+    {
+      "episode_index": 21,
+      "probe_id": "math500_0042",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0039",
+        "math500_0040",
+        "math500_0041"
+      ]
+    },
+    {
+      "episode_index": 22,
+      "probe_id": "math500_0044",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0040",
+        "math500_0041",
+        "math500_0042"
+      ]
+    },
+    {
+      "episode_index": 23,
+      "probe_id": "math500_0045",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0041",
+        "math500_0042",
+        "math500_0044"
+      ]
+    },
+    {
+      "episode_index": 24,
+      "probe_id": "math500_0046",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0042",
+        "math500_0044",
+        "math500_0045"
+      ]
+    },
+    {
+      "episode_index": 25,
+      "probe_id": "math500_0047",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0044",
+        "math500_0045",
+        "math500_0046"
+      ]
+    },
+    {
+      "episode_index": 26,
+      "probe_id": "math500_0049",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0045",
+        "math500_0046",
+        "math500_0047"
+      ]
+    },
+    {
+      "episode_index": 27,
+      "probe_id": "math500_0050",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0046",
+        "math500_0047",
+        "math500_0049"
+      ]
+    },
+    {
+      "episode_index": 28,
+      "probe_id": "math500_0052",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0047",
+        "math500_0049",
+        "math500_0050"
+      ]
+    },
+    {
+      "episode_index": 29,
+      "probe_id": "math500_0054",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0049",
+        "math500_0050",
+        "math500_0052"
+      ]
+    },
+    {
+      "episode_index": 30,
+      "probe_id": "math500_0055",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0050",
+        "math500_0052",
+        "math500_0054"
+      ]
+    },
+    {
+      "episode_index": 31,
+      "probe_id": "math500_0056",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0052",
+        "math500_0054",
+        "math500_0055"
+      ]
+    },
+    {
+      "episode_index": 32,
+      "probe_id": "math500_0057",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0054",
+        "math500_0055",
+        "math500_0056"
+      ]
+    },
+    {
+      "episode_index": 33,
+      "probe_id": "math500_0058",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0055",
+        "math500_0056",
+        "math500_0057"
+      ]
+    },
+    {
+      "episode_index": 34,
+      "probe_id": "math500_0059",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0056",
+        "math500_0057",
+        "math500_0058"
+      ]
+    },
+    {
+      "episode_index": 35,
+      "probe_id": "math500_0061",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0057",
+        "math500_0058",
+        "math500_0059"
+      ]
+    },
+    {
+      "episode_index": 36,
+      "probe_id": "math500_0062",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0058",
+        "math500_0059",
+        "math500_0061"
+      ]
+    },
+    {
+      "episode_index": 37,
+      "probe_id": "math500_0063",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0059",
+        "math500_0061",
+        "math500_0062"
+      ]
+    },
+    {
+      "episode_index": 38,
+      "probe_id": "math500_0065",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0061",
+        "math500_0062",
+        "math500_0063"
+      ]
+    },
+    {
+      "episode_index": 39,
+      "probe_id": "math500_0067",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0062",
+        "math500_0063",
+        "math500_0065"
+      ]
+    },
+    {
+      "episode_index": 40,
+      "probe_id": "math500_0068",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_02",
+          "story_01_03",
+          "story_01_04",
+          "story_01_05"
+        ],
+        "10": [
+          "story_10_02",
+          "story_10_03",
+          "story_10_04",
+          "story_10_05"
+        ],
+        "2": [
+          "story_02_02",
+          "story_02_03",
+          "story_02_04",
+          "story_02_05"
+        ],
+        "3": [
+          "story_03_02",
+          "story_03_03",
+          "story_03_04",
+          "story_03_05"
+        ],
+        "4": [
+          "story_04_02",
+          "story_04_03",
+          "story_04_04",
+          "story_04_05"
+        ],
+        "5": [
+          "story_05_02",
+          "story_05_03",
+          "story_05_04",
+          "story_05_05"
+        ],
+        "6": [
+          "story_06_02",
+          "story_06_03",
+          "story_06_04",
+          "story_06_05"
+        ],
+        "7": [
+          "story_07_02",
+          "story_07_03",
+          "story_07_04",
+          "story_07_05"
+        ],
+        "8": [
+          "story_08_02",
+          "story_08_03",
+          "story_08_04",
+          "story_08_05"
+        ],
+        "9": [
+          "story_09_02",
+          "story_09_03",
+          "story_09_04",
+          "story_09_05"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0063",
+        "math500_0065",
+        "math500_0067"
+      ]
+    },
+    {
+      "episode_index": 41,
+      "probe_id": "math500_0069",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_03",
+          "story_01_04",
+          "story_01_05",
+          "story_01_01"
+        ],
+        "10": [
+          "story_10_03",
+          "story_10_04",
+          "story_10_05",
+          "story_10_01"
+        ],
+        "2": [
+          "story_02_03",
+          "story_02_04",
+          "story_02_05",
+          "story_02_01"
+        ],
+        "3": [
+          "story_03_03",
+          "story_03_04",
+          "story_03_05",
+          "story_03_01"
+        ],
+        "4": [
+          "story_04_03",
+          "story_04_04",
+          "story_04_05",
+          "story_04_01"
+        ],
+        "5": [
+          "story_05_03",
+          "story_05_04",
+          "story_05_05",
+          "story_05_01"
+        ],
+        "6": [
+          "story_06_03",
+          "story_06_04",
+          "story_06_05",
+          "story_06_01"
+        ],
+        "7": [
+          "story_07_03",
+          "story_07_04",
+          "story_07_05",
+          "story_07_01"
+        ],
+        "8": [
+          "story_08_03",
+          "story_08_04",
+          "story_08_05",
+          "story_08_01"
+        ],
+        "9": [
+          "story_09_03",
+          "story_09_04",
+          "story_09_05",
+          "story_09_01"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0065",
+        "math500_0067",
+        "math500_0068"
+      ]
+    },
+    {
+      "episode_index": 42,
+      "probe_id": "math500_0072",
+      "shortcut_cue_type": "plus_one",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_04",
+          "story_01_05",
+          "story_01_01",
+          "story_01_02"
+        ],
+        "10": [
+          "story_10_04",
+          "story_10_05",
+          "story_10_01",
+          "story_10_02"
+        ],
+        "2": [
+          "story_02_04",
+          "story_02_05",
+          "story_02_01",
+          "story_02_02"
+        ],
+        "3": [
+          "story_03_04",
+          "story_03_05",
+          "story_03_01",
+          "story_03_02"
+        ],
+        "4": [
+          "story_04_04",
+          "story_04_05",
+          "story_04_01",
+          "story_04_02"
+        ],
+        "5": [
+          "story_05_04",
+          "story_05_05",
+          "story_05_01",
+          "story_05_02"
+        ],
+        "6": [
+          "story_06_04",
+          "story_06_05",
+          "story_06_01",
+          "story_06_02"
+        ],
+        "7": [
+          "story_07_04",
+          "story_07_05",
+          "story_07_01",
+          "story_07_02"
+        ],
+        "8": [
+          "story_08_04",
+          "story_08_05",
+          "story_08_01",
+          "story_08_02"
+        ],
+        "9": [
+          "story_09_04",
+          "story_09_05",
+          "story_09_01",
+          "story_09_02"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0067",
+        "math500_0068",
+        "math500_0069"
+      ]
+    },
+    {
+      "episode_index": 43,
+      "probe_id": "math500_0076",
+      "shortcut_cue_type": "times_ten",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_05",
+          "story_01_01",
+          "story_01_02",
+          "story_01_03"
+        ],
+        "10": [
+          "story_10_05",
+          "story_10_01",
+          "story_10_02",
+          "story_10_03"
+        ],
+        "2": [
+          "story_02_05",
+          "story_02_01",
+          "story_02_02",
+          "story_02_03"
+        ],
+        "3": [
+          "story_03_05",
+          "story_03_01",
+          "story_03_02",
+          "story_03_03"
+        ],
+        "4": [
+          "story_04_05",
+          "story_04_01",
+          "story_04_02",
+          "story_04_03"
+        ],
+        "5": [
+          "story_05_05",
+          "story_05_01",
+          "story_05_02",
+          "story_05_03"
+        ],
+        "6": [
+          "story_06_05",
+          "story_06_01",
+          "story_06_02",
+          "story_06_03"
+        ],
+        "7": [
+          "story_07_05",
+          "story_07_01",
+          "story_07_02",
+          "story_07_03"
+        ],
+        "8": [
+          "story_08_05",
+          "story_08_01",
+          "story_08_02",
+          "story_08_03"
+        ],
+        "9": [
+          "story_09_05",
+          "story_09_01",
+          "story_09_02",
+          "story_09_03"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0068",
+        "math500_0069",
+        "math500_0072"
+      ]
+    },
+    {
+      "episode_index": 44,
+      "probe_id": "math500_0077",
+      "shortcut_cue_type": "random",
+      "story_ids_by_cue_count": {
+        "1": [
+          "story_01_01",
+          "story_01_02",
+          "story_01_03",
+          "story_01_04"
+        ],
+        "10": [
+          "story_10_01",
+          "story_10_02",
+          "story_10_03",
+          "story_10_04"
+        ],
+        "2": [
+          "story_02_01",
+          "story_02_02",
+          "story_02_03",
+          "story_02_04"
+        ],
+        "3": [
+          "story_03_01",
+          "story_03_02",
+          "story_03_03",
+          "story_03_04"
+        ],
+        "4": [
+          "story_04_01",
+          "story_04_02",
+          "story_04_03",
+          "story_04_04"
+        ],
+        "5": [
+          "story_05_01",
+          "story_05_02",
+          "story_05_03",
+          "story_05_04"
+        ],
+        "6": [
+          "story_06_01",
+          "story_06_02",
+          "story_06_03",
+          "story_06_04"
+        ],
+        "7": [
+          "story_07_01",
+          "story_07_02",
+          "story_07_03",
+          "story_07_04"
+        ],
+        "8": [
+          "story_08_01",
+          "story_08_02",
+          "story_08_03",
+          "story_08_04"
+        ],
+        "9": [
+          "story_09_01",
+          "story_09_02",
+          "story_09_03",
+          "story_09_04"
+        ]
+      },
+      "teaching_ids": [
+        "math500_0069",
+        "math500_0072",
+        "math500_0076"
+      ]
+    }
+  ],
+  "manifest_sha256": "293c6409b824b138595878d36a928d42f8af47d1c5b5009d28dc36efb99900f4",
+  "manifest_version": 1,
+  "story_pool_sha256": "ddfb50eeb3d6b35b9ec7444b628dbefc045f25af5e9faf6ef7ab796456b99ecf",
+  "teaching_turns": 3
+}

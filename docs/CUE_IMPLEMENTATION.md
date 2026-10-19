@@ -25,15 +25,7 @@ Example:
 
 ## Experiment 1
 
-Experiment 1 puts the wrong-answer cue inside one story.
-
-The story pool contains 5 story templates for each cue count from `1` through `10`. Every template is 60-100 words so story length stays controlled across cue-count scenarios. The `0` cue count is the control group.
-
-We plot how often the model follows the shortcut as the cue count increases.
-
-## Experiment 2
-
-Experiment 2 uses a live conversation history.
+Experiment 1 uses a live conversation history.
 
 It creates 45 episodes and assigns exactly one wrong-answer strategy to each
 episode: correct answer + 1, correct answer x 10, or a deterministic random
@@ -44,16 +36,18 @@ For each episode:
 
 1. Pick a cue count from `1` through `10`.
 2. Assign the episode's wrong-answer strategy.
-3. Add 3 teaching turns with predetermined shortcut answers; these turns do not call the model.
+3. Add 3 scripted teaching turns; these turns do not call the model.
+   - `assistant_wrong`: story number = scripted answer = shortcut != gold.
+   - `assistant_correct`: story number = scripted answer = gold.
 4. Save each scripted assistant answer in the conversation history.
 5. Send one final probe and the full history to the model, using the same cue count and strategy.
 6. Label whether the probe answer followed the shortcut.
 
-Each placeholder within an Experiment 2 story is rendered as a different,
+The probe always uses a wrong cue in both conditions. Each placeholder within an Experiment 1 story is rendered as a different,
 deterministic paraphrase of the same shortcut answer. This varies wording without
 changing the answer being planted or the requested cue count.
 
-The graph has two panels:
+The graph separates both teaching conditions and two reasoning modes:
 
 - reasoning off
 - reasoning on

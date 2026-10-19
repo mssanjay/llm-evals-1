@@ -50,6 +50,7 @@ def test_resume_retries_only_failed_episodes(tmp_path: Path, monkeypatch: pytest
     assert rows[0]["probe_was_truncated"] is False
     assert [row["cue_strategy"] for row in rows] == ["plus_one", "times_ten"]
     assert rows[0]["scripted_teaching_count"] == 3
+    assert rows[0]["condition"] == "assistant_wrong"
     assert rows[0]["rule_held_count"] == 3
     assert rows[0]["teaching_labels"] == "followed_bad_clue|followed_bad_clue|followed_bad_clue"
     assert rows[0]["teaching_response_source_1"] == "scripted"
@@ -91,6 +92,7 @@ def test_real_provider_is_called_only_for_the_probe(
         temperature=0.2,
         max_tokens=64,
         reasoning_modes=["off"],
+        conditions=["assistant_wrong"],
         cue_counts=[1],
         max_workers=1,
         story_pool_path=ROOT / "data" / "story_pool.jsonl",
@@ -181,6 +183,7 @@ def _run(
         temperature=0.2,
         max_tokens=64,
         reasoning_modes=["off"],
+        conditions=["assistant_wrong"],
         cue_counts=[1],
         max_workers=1,
         story_pool_path=ROOT / "data" / "story_pool.jsonl",

@@ -1,4 +1,4 @@
-"""Generate reproducible wrong-answer cues for Experiment 2."""
+"""Generate reproducible wrong-answer cues for Experiment 1."""
 
 from __future__ import annotations
 

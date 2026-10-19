@@ -1,0 +1,32 @@
+{
+  "comparison": {
+    "measurement": "inline_response_chars",
+    "off": 23,
+    "on": 160
+  },
+  "max_tokens": 8192,
+  "model": "deepseek.v3.1",
+  "off": {
+    "completion_tokens": 8,
+    "finish_reason": "stop",
+    "prompt_tokens": 52,
+    "reasoning": "",
+    "reasoning_chars": 0,
+    "reasoning_tokens": null,
+    "response": "323  \nFinal answer: 323",
+    "response_chars": 23
+  },
+  "on": {
+    "completion_tokens": 64,
+    "finish_reason": "stop",
+    "prompt_tokens": 49,
+    "reasoning": "",
+    "reasoning_chars": 0,
+    "reasoning_tokens": null,
+    "response": "To compute \\(17 \\times 19\\), you can break it down:\n\n\\(17 \\times 19 = 17 \\times (20 - 1) = (17 \\times 20) - (17 \\times 1) = 340 - 17 = 323\\).\n\nFinal answer: 323",
+    "response_chars": 160
+  },
+  "passed": true,
+  "provider": "aws",
+  "same_user_input": "Compute 17 times 19. Always end with 'Final answer: <number>'."
+}

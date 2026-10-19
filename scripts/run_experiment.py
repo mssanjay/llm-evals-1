@@ -1,4 +1,4 @@
-"""Run Experiment 2 live-history teaching turns on MATH-500."""
+"""Run Experiment 1 live-history teaching turns on MATH-500."""
 
 from __future__ import annotations
 
@@ -11,7 +11,20 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.experiment import run_experiment, write_experiment_outputs
+from cue_eval.experiment import (
+    DEFAULT_MAX_TOKENS,
+    run_experiment,
+    run_reasoning_preflight,
+)
+from cue_eval.output_writer import write_experiment_outputs
+
+
+DEFAULT_PROVIDER = "aws"
+DEFAULT_MODEL = "qwen.qwen3-32b"
+DEFAULT_PREPARED_DIR = "data"
+DEFAULT_STORY_POOL = "data/story_pool.jsonl"
+DEFAULT_CUE_COUNTS = "1,2,3,4,5,6,7,8,9,10"
+DEFAULT_OUTPUT_DIR = "outputs/experiment_bedrock"
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,13 +33,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--provider",
         choices=["dryrun", "mock", "ollama", "openrouter", "aws", "azure-foundry", "azure-openai", "azure-ai"],
-        default="dryrun",
+        default=DEFAULT_PROVIDER,
     )
-    parser.add_argument("--model", default="qwen3-32b")
-    parser.add_argument("--prepared-dir", default="data")
-    parser.add_argument("--output-dir", default="outputs/experiment_comparison")
+    parser.add_argument("--model", default=DEFAULT_MODEL)
+    parser.add_argument("--prepared-dir", default=DEFAULT_PREPARED_DIR)
+    parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--temperature", type=float, default=0.2)
-    parser.add_argument("--max-tokens", type=int, default=2048)
+    parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     parser.add_argument(
         "--input-cost-per-million",
         help="USD per 1M input tokens; set together with --output-cost-per-million.",
@@ -36,7 +49,12 @@ def parse_args() -> argparse.Namespace:
         help="USD per 1M output tokens; set together with --input-cost-per-million.",
     )
     parser.add_argument("--reasoning-modes", default="off,on")
-    parser.add_argument("--cue-counts", default="1,2,3,4,5,6,7,8,9,10")
+    parser.add_argument(
+        "--conditions",
+        default="assistant_wrong,assistant_correct",
+        help="Comma-separated scripted teaching conditions.",
+    )
+    parser.add_argument("--cue-counts", default=DEFAULT_CUE_COUNTS)
     parser.add_argument(
         "--episodes",
         type=int,
@@ -49,7 +67,12 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Parallel episodes to run at once. Auto: 1 for Ollama, 4 for hosted providers.",
     )
-    parser.add_argument("--story-pool", default="data/story_pool.jsonl")
+    parser.add_argument("--story-pool", default=DEFAULT_STORY_POOL)
+    parser.add_argument(
+        "--skip-reasoning-preflight",
+        action="store_true",
+        help="Skip the required two-call reasoning-field check.",
+    )
     checkpoint_group = parser.add_mutually_exclusive_group()
     checkpoint_group.add_argument(
         "--fresh",
@@ -59,7 +82,7 @@ def parse_args() -> argparse.Namespace:
     checkpoint_group.add_argument(
         "--adopt-checkpoint",
         action="store_true",
-        help="Resume a legacy partial CSV once, then protect it with checkpoint metadata.",
+        help="Adopt a current-schema partial CSV that is missing checkpoint metadata.",
     )
     return parser.parse_args()
 
@@ -70,11 +93,26 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     reasoning_modes = [mode.strip() for mode in args.reasoning_modes.split(",") if mode.strip()]
+    conditions = [value.strip() for value in args.conditions.split(",") if value.strip()]
     cue_counts = [int(value.strip()) for value in args.cue_counts.split(",") if value.strip()]
     max_workers = args.max_workers or (1 if args.provider == "ollama" else 4)
 
     dataset = "math500"
     data_path = _prepared_path(dataset, Path(args.prepared_dir))
+    if {"off", "on"}.issubset(reasoning_modes) and not args.skip_reasoning_preflight:
+        report = run_reasoning_preflight(
+            provider=args.provider,
+            model=args.model,
+            temperature=args.temperature,
+            max_tokens=args.max_tokens,
+            output_path=output_dir / "reasoning_preflight.json",
+        )
+        comparison = report["comparison"]
+        print(
+            "Reasoning preflight passed: "
+            f"measurement={comparison['measurement']} "
+            f"off={comparison['off']} on={comparison['on']}"
+        )
     all_rows = run_experiment(
         data_path=data_path,
         dataset_name=dataset,
@@ -84,6 +122,7 @@ def main() -> None:
         temperature=args.temperature,
         max_tokens=args.max_tokens,
         reasoning_modes=reasoning_modes,
+        conditions=conditions,
         cue_counts=cue_counts,
         episode_limit=args.episodes,
         max_workers=max_workers,
@@ -128,6 +167,7 @@ def _write_full_results(path: Path, rows: list[dict[str, Any]], model: str, prov
                 "Dataset": "math500",
                 "Cue type": "wrong_answer_shortcut_cue",
                 "History": "live-history teaching turns",
+                "Condition": row["condition"],
                 "Reasoning": row["reasoning"],
                 "Story": f"cue_count={cue_count}",
                 "n": row["n"],

@@ -27,7 +27,10 @@ def test_chat_completion_preserves_finish_reason_and_usage() -> None:
         {
             "choices": [
                 {
-                    "message": {"content": "unfinished"},
+                    "message": {
+                        "content": "unfinished",
+                        "reasoning_content": "private reasoning",
+                    },
                     "finish_reason": "length",
                 }
             ],
@@ -35,12 +38,21 @@ def test_chat_completion_preserves_finish_reason_and_usage() -> None:
                 "prompt_tokens": 120,
                 "completion_tokens": 256,
                 "total_tokens": 376,
+                "completion_tokens_details": {"reasoning_tokens": 200},
             },
         },
         "test provider",
     )
 
-    assert result == ModelResponse("unfinished", "length", 120, 256, 376)
+    assert result == ModelResponse(
+        "unfinished",
+        "length",
+        120,
+        256,
+        376,
+        "private reasoning",
+        200,
+    )
     assert result.was_truncated is True
 
 
