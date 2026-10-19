@@ -282,23 +282,17 @@ python scripts/rescore_experiment.py `
   --output-dir outputs\experiment_2_bedrock_run3
 ```
 
-### Demo Conversation Examples
+### Experiment Walkthrough
 
-After running Experiment 1, create three upload-ready paired conversations with
-reasoning off and reasoning on:
-
-- `data\demo_conversation_examples.json`
-- `data\demo_conversation_examples.jsonl`
-- `docs\demo_conversation_examples.md`
-
-Generate these files from the latest run outputs:
+After running Experiment 1, create one simple Markdown walkthrough with the
+experiment steps and three paired reasoning examples:
 
 ```powershell
-python scripts/create_demo_conversation_examples.py
+python scripts/create_experiment_walkthrough.py outputs\experiment_bedrock
 ```
 
-The generator checks that model-facing prompts do not include scaffold labels
-such as `Teaching story turn`, `Practice problem`, or probe-specific labels.
+This writes `outputs\experiment_bedrock\experiment_walkthrough.md` and shows
+examples for cue counts 3, 5, and 10.
 
 Run Experiment 1 against Microsoft Foundry:
 
