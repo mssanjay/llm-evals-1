@@ -81,6 +81,12 @@ For each episode:
 
 Each teaching turn uses a complex story from `data/story_pool.jsonl`, followed by a math problem and a scripted `Final answer: <shortcut>` assistant response. The story pool has 5 templates for each cue count from 1 through 10, with every template kept between 60 and 100 words. The output CSV saves `teaching_prompt_1` through `teaching_prompt_3`, `teaching_response_1` through `teaching_response_3`, and `probe_prompt` so the full conversation can be inspected.
 
+For easier manual review, each completed run also writes `experiment_results_simplified.csv`. Its `actual_probe` column combines the three scripted teaching exchanges and final probe into one readable transcript. Create the same compact file for an existing run with:
+
+```powershell
+python scripts/create_simplified_results.py outputs\experiment-with-qwen
+```
+
 Within an Experiment 1 story, repeated cues use deterministic paraphrases rather
 than repeating one sentence verbatim. Every paraphrase states the same shortcut
 answer; `cue_count` is therefore the number of semantically equivalent cue

@@ -13,6 +13,7 @@ from cue_eval.usage import TokenPricing, summarize_usage
 
 
 DEFAULT_TEACHING_TURNS = 3
+SIMPLIFIED_RESULTS_FILENAME = "experiment_results_simplified.csv"
 STORY_LENGTH_CAPTION = (
     "Story templates are constrained to 60\u2013100 words before cue substitution."
 )
@@ -170,10 +171,14 @@ def write_experiment_outputs(
     rows: list[dict[str, Any]],
     teaching_turns: int = DEFAULT_TEACHING_TURNS,
 ) -> list[dict[str, Any]]:
-    """Write summary CSV, outcome plots, and the story-length diagnostic."""
+    """Write simplified results, summary data, and diagnostic plots."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     summary = summarize_experiment(rows)
+    write_csv(
+        output_path / SIMPLIFIED_RESULTS_FILENAME,
+        simplify_experiment_rows(rows, teaching_turns),
+    )
     write_csv(output_path / "experiment_summary.csv", summary)
     _write_cue_count_plot(
         output_path / "experiment_shortcut_count_by_cue_count.png",
@@ -192,6 +197,48 @@ def write_experiment_outputs(
         teaching_turns,
     )
     return summary
+
+
+def simplify_experiment_rows(
+    rows: list[dict[str, Any]],
+    teaching_turns: int = DEFAULT_TEACHING_TURNS,
+) -> list[dict[str, Any]]:
+    """Keep the manual-analysis fields and combine the probe conversation."""
+    return [
+        {
+            "model": row["model"],
+            "condition": row["condition"],
+            "reasoning": row["reasoning"],
+            "cue_count": row["cue_count"],
+            "cue_strategy": row["cue_strategy"],
+            "probe_id": row["probe_id"],
+            "actual_probe": _actual_probe(row, teaching_turns),
+            "probe_response": row["probe_response"],
+            "probe_answer": row["probe_answer"],
+            "probe_correct_answer": row["probe_correct_answer"],
+            "probe_shortcut_answer": row["probe_shortcut_answer"],
+            "probe_label": row["probe_label"],
+            "probe_was_truncated": row["probe_was_truncated"],
+        }
+        for row in rows
+    ]
+
+
+def _actual_probe(row: dict[str, Any], teaching_turns: int) -> str:
+    """Render the teaching history and final probe as one readable transcript."""
+    sections: list[str] = []
+    for index in range(1, teaching_turns + 1):
+        sections.extend(
+            [
+                f"TEACHING TURN {index} - USER:\n{row[f'teaching_prompt_{index}']}",
+                (
+                    f"TEACHING TURN {index} - ASSISTANT (SCRIPTED):\n"
+                    f"{row[f'teaching_response_{index}']}"
+                ),
+            ]
+        )
+    sections.append(f"FINAL PROBE - USER:\n{row['probe_prompt']}")
+    return "\n\n".join(sections)
 
 
 def write_combined_experiment_outputs(
