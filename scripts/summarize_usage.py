@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.usage import (
+from cue_eval.token_usage_tracker import (
     format_usage_summary,
     resolve_token_pricing,
     summarize_usage,

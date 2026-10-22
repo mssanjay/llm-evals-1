@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from cue_eval.experiment import _system_prompt, rescore_experiment_rows
 from cue_eval.providers import ModelResponse, _chat_completion_result
-from cue_eval.response_parser import extract_final_number
+from cue_eval.model_response_parser import extract_final_number
 
 
 def test_qwen_reasoning_modes_use_explicit_switches() -> None:

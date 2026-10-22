@@ -6,7 +6,7 @@ import math
 from typing import Any
 
 # Preserve the original import path for existing callers.
-from cue_eval.response_parser import extract_final_number as extract_final_number
+from cue_eval.model_response_parser import extract_final_number as extract_final_number
 
 
 def label_answer(model_answer: float | None, correct_answer: float, shortcut_answer: float) -> str:

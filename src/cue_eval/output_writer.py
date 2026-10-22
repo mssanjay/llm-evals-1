@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cue_eval.usage import TokenPricing, summarize_usage
+from cue_eval.token_usage_tracker import TokenPricing, summarize_usage
 
 
 DEFAULT_TEACHING_TURNS = 3

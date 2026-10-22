@@ -15,7 +15,7 @@ from cue_eval.cue_strategies import apply_cue_strategy, strategy_for_episode
 from cue_eval.data import load_examples
 from cue_eval.episode_creation import create_rolling_episodes
 from cue_eval.story_pool import PLACEHOLDER, load_story_pool
-from cue_eval.usage import resolve_token_pricing
+from cue_eval.token_usage_tracker import resolve_token_pricing
 
 
 def test_teaching_conditions_change_only_the_teaching_answer() -> None:

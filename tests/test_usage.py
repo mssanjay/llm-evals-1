@@ -12,7 +12,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cue_eval.usage import UsageTracker, resolve_token_pricing, summarize_usage
+from cue_eval.token_usage_tracker import UsageTracker, resolve_token_pricing, summarize_usage
 
 
 def test_bedrock_qwen_usage_uses_known_standard_rate() -> None:
